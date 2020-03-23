@@ -1,0 +1,29 @@
+dist: bionic
+sudo: required
+
+language: cpp
+
+os:
+  - linux
+
+compiler:
+  - gcc
+
+script:
+  - mkdir cmake-build-release
+  - cd cmake-build-release
+  - cmake ../
+  - make
+  - cd ..
+  - mkdir cmake-build-debug
+  - cd cmake-build-debug
+  - cmake ../ -DDEBUG=True
+  - make
+  - ./Game
+
+notifications:
+  email:
+    recipients:
+      - grib.a@phystech.edu
+    on_success: always
+    on_failure: always
