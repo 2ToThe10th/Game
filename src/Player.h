@@ -9,16 +9,19 @@
 
 #include "Location.h"
 
+
 class Player {
  public:
   explicit Player(std::string name, const Location &start_location);
 
   [[nodiscard]] const Location &GetLocation() const;
+
   void SetLocation(const Location &location);
 
  private:
   Location location_;
   std::string name_;
+  bool is_valid;
  private:
 };
 

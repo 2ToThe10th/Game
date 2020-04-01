@@ -3,6 +3,8 @@
 //
 
 #include "Location.h"
+
+
 Location::Location(unsigned x, unsigned y) : x_(x), y_(y) {}
 
 Location::Location(const Location &location) {

@@ -3,6 +3,8 @@
 //
 
 #include "Player.h"
+
+
 Player::Player(std::string name, const Location &start_location)
     : name_(std::move(name)), location_(start_location) {}
 

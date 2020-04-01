@@ -8,13 +8,17 @@
 class Location {
  public:
   Location() = default;
+
   Location(unsigned x, unsigned y);
+
   Location(const Location &location);
 
   [[nodiscard]] unsigned GetX() const;
+
   [[nodiscard]] unsigned GetY() const;
 
   void SetX(unsigned x);
+
   void SetY(unsigned y);
 
  private:
