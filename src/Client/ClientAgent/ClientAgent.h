@@ -20,18 +20,21 @@ namespace Client {
 
 class ClientAgent {
  public:
-  ClientAgent() = default;
+  explicit ClientAgent(sf::RenderWindow &window);
 
-  void InitGame(const std::string &host, size_t udp_port, size_t tcp_port, sf::RenderWindow &window);
+  void InitGame(const std::string &host, size_t tcp_port, size_t udp_port);
 
   void RunGame();
 
+  void Close();
+
  private:
+  sf::RenderWindow& window_;
+  Map map_;
   GraphicAgent::GraphicAgent graphic_agent_;
   InputAgent::InputAgent input_agent_;
   TCPSocketAgent::TCPSocketAgent tcp_socket_agent_;
   UDPSocketAgent::UDPSocketAgent udp_socket_agent_;
-
 };
 
 } // namespace client

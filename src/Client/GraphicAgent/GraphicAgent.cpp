@@ -9,6 +9,24 @@
 
 namespace Client::GraphicAgent {
 
+GraphicAgent::GraphicAgent(Map &main_map, sf::RenderWindow &window) : graphic_map_(main_map), window_(window) {
+
+}
+
+void GraphicAgent::Initialize(sf::Image &&image) {
+//  texture_.loadFromImage(image);
+// TODO
+}
+
+void GraphicAgent::Draw() {
+
+}
+
+}
+
+
+
+/*
 Location place(0, 0);
 
 GraphicAgent::GraphicAgent(Map &map, sf::RenderWindow &window)
@@ -57,7 +75,7 @@ void GraphicAgent::HandlerKeyRelease(sf::Event &event) {
 // proxy class - marshaling
 
 void GraphicAgent::WatchUserAction() {
-  if (Now() - last_send_info_time_ < send_interval) {
+  if (Now() - last_send_info_time_ < kSendInterval) {
     return;
   }
 
@@ -102,10 +120,6 @@ bool GraphicAgent::IsLeftKeyPressed() const {
   return key_pressed_[sf::Keyboard::A];
 }
 
-Duration GraphicAgent::Now() const {
-  return std::chrono::duration_cast<Duration>(std::chrono::steady_clock::now().time_since_epoch());
-}
-
 void GraphicAgent::SendUserAction(Angle angle) {
   if (angle == Angle::Up) {
     place.SetY(std::max<unsigned>(place.GetY(), 1) - 1);
@@ -147,7 +161,10 @@ void GraphicAgent::Draw() {
   window_.display();
 
 }
+GraphicAgent::GraphicAgent(sf::RenderWindow &window, Map &main_map) : graphic_map_(main_map),  {
+
+}
 void GraphicAgent::Initialize(Map &map, sf::RenderWindow &window) {
 
 }
-}
+ */

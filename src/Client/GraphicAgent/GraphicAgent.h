@@ -10,31 +10,39 @@
 
 #include "../../Angle.h"
 #include "../ClientAgent/Map.h"
+#include "GraphicMap.h"
 
 
 namespace Client::GraphicAgent {
 
-using Duration = std::chrono::microseconds;
-
 class GraphicAgent {
  public:
+  GraphicAgent(Map &main_map, sf::RenderWindow &window);
 
-  void Initialize(Map &map, sf::RenderWindow &window);
+  void Initialize(sf::Image&& image);
+
+  void Draw();
+
+ private:
+
+  GraphicMap graphic_map_;
+  sf::RenderWindow &window_;
+  sf::Texture texture_;
+
+};
+}
+#endif //GAME_SRC_GAMEGRAPHIC_H_
+
+
+/*
+
+
+
+ private:
+  void Initialize(GraphicMap &map, sf::RenderWindow &window);
 
   void GameLoop();
 
- private:
-  Map &map_;
-  sf::RenderWindow &window_;
-
-  std::vector<bool> key_pressed_ = std::vector<bool>(sf::Keyboard::KeyCount);
-
-  Duration last_send_info_time_;
-  constexpr static auto send_interval = Duration(1000);
-
-  sf::Texture texture_;
-
- private:
   void HandlerEvent(sf::Event &event);
 
   void HandlerKeyPressed(sf::Event &event);
@@ -60,5 +68,4 @@ class GraphicAgent {
   [[nodiscard]] Duration Now() const;
 };
 
-}
-#endif //GAME_SRC_GAMEGRAPHIC_H_
+*/

@@ -5,7 +5,13 @@
 #ifndef GAME_SRC_MARSHALING_H_
 #define GAME_SRC_MARSHALING_H_
 
-class Marshaling {
+#include <string>
+#include "Client/InputAgent/UserAction.h"
+
+
+namespace Marshaling {
+
+  std::string FromInputToUDPSocket(Client::InputAgent::UserAction user_input);
 
 };
 

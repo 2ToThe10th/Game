@@ -33,6 +33,7 @@ class Map {
  private:
   std::vector<Player> players_;
   std::shared_mutex mutex_;
+  size_t number_of_changes_ = 0;
 };
 
 }  // namespace Client
