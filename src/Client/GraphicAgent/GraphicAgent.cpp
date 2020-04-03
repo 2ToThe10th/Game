@@ -9,17 +9,22 @@
 
 namespace Client::GraphicAgent {
 
-GraphicAgent::GraphicAgent(Map &main_map, sf::RenderWindow &window) : graphic_map_(main_map), window_(window) {
+GraphicAgent::GraphicAgent(ClientMap &main_map, sf::RenderWindow &window)
+    : graphic_map_(main_map), window_(window) {
 
 }
 
 void GraphicAgent::Initialize(sf::Image &&image) {
-//  texture_.loadFromImage(image);
+  texture_.loadFromImage(image);
 // TODO
 }
 
 void GraphicAgent::Draw() {
+  window_.clear(sf::Color::Black);
 
+  window_.draw(sf::Sprite(texture_));
+
+  window_.display();
 }
 
 }
@@ -29,7 +34,7 @@ void GraphicAgent::Draw() {
 /*
 Location place(0, 0);
 
-GraphicAgent::GraphicAgent(Map &map, sf::RenderWindow &window)
+GraphicAgent::GraphicAgent(ServerMap &map, sf::RenderWindow &window)
     : map_(map), window_(window), last_send_info_time_(Now()) {
   texture_.loadFromImage(map_.GetImage());
 }
@@ -161,10 +166,10 @@ void GraphicAgent::Draw() {
   window_.display();
 
 }
-GraphicAgent::GraphicAgent(sf::RenderWindow &window, Map &main_map) : graphic_map_(main_map),  {
+GraphicAgent::GraphicAgent(sf::RenderWindow &window, ServerMap &main_map) : graphic_map_(main_map),  {
 
 }
-void GraphicAgent::Initialize(Map &map, sf::RenderWindow &window) {
+void GraphicAgent::Initialize(ServerMap &map, sf::RenderWindow &window) {
 
 }
  */

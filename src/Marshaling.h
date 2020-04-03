@@ -6,12 +6,12 @@
 #define GAME_SRC_MARSHALING_H_
 
 #include <string>
-#include "Client/InputAgent/UserAction.h"
+#include "UserAction.h"
 
 
 namespace Marshaling {
 
-  std::string FromInputToUDPSocket(Client::InputAgent::UserAction user_input);
+std::string FromInputToUDPSocket(UserAction user_input);
 
 };
 

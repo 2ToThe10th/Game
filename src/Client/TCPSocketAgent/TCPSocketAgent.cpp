@@ -9,24 +9,19 @@
 #include <unistd.h>
 #include <iostream>
 #include "TCPSocketAgent.h"
+#include "../../TCPSocketHelper.h"
 
 
 namespace Client::TCPSocketAgent {
-TCPSocketAgent::TCPSocketAgent(Map &main_map) : main_map_(main_map) {
+TCPSocketAgent::TCPSocketAgent(ClientMap &main_map) : main_map_(main_map) {
 
 }
-
-class InetAtonExeption : public std::exception {
-  [[nodiscard]] const char *what() const noexcept override {
-    return "inet aton";
-  }
-};
 
 void TCPSocketAgent::Initialize(const std::string &host, const size_t port, sf::Image &image) {
 
   Connect(host, port);
 
-  // TODO: Read image, get current situation
+  ReceiveImage(image);
 
   tcp_read_thread_ = std::thread([this]() {
     this->RunTCPRead();
@@ -44,12 +39,22 @@ void TCPSocketAgent::Connect(const std::string &host, size_t port) {
   server_address.sin_port = htons(port);
 
   if (inet_aton(host.c_str(), &server_address.sin_addr) != 1) {
-    throw InetAtonExeption();
+    throw TCPSocketHelper::InetAtonExeption();
   }
 
   if (connect(socket_, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
     throw std::system_error(errno, std::generic_category());
   }
+}
+
+void TCPSocketAgent::ReceiveImage(sf::Image &image) {
+  int height = 0;
+  int width = 0;
+  TCPSocketHelper::ReadAll(socket_, (char *) &height, sizeof(int));
+  TCPSocketHelper::ReadAll(socket_, (char *) &width, sizeof(int));
+  auto array_of_image = new sf::Uint8[height * width * 4];
+  TCPSocketHelper::ReadAll(socket_, (char *) array_of_image, height * width * 4);
+  image.create(width, height, array_of_image);
 }
 
 void TCPSocketAgent::Close() {

@@ -9,7 +9,7 @@
 #include <SFML/Window.hpp>
 
 #include "../../Angle.h"
-#include "../ClientAgent/Map.h"
+#include "../ClientAgent/ClientMap.h"
 #include "GraphicMap.h"
 
 
@@ -17,9 +17,9 @@ namespace Client::GraphicAgent {
 
 class GraphicAgent {
  public:
-  GraphicAgent(Map &main_map, sf::RenderWindow &window);
+  GraphicAgent(ClientMap &main_map, sf::RenderWindow &window);
 
-  void Initialize(sf::Image&& image);
+  void Initialize(sf::Image &&image);
 
   void Draw();
 

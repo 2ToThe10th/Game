@@ -5,10 +5,7 @@
 #ifndef GAME_SRC_CLIENT_INPUTAGENT_USERACTION_H_
 #define GAME_SRC_CLIENT_INPUTAGENT_USERACTION_H_
 
-#include "../../Angle.h"
-
-
-namespace Client::InputAgent {
+#include "Angle.h"
 
 class UserAction {
  public:
@@ -25,7 +22,5 @@ class UserAction {
  private:
   Angle angle_;
 };
-
-}
 
 #endif //GAME_SRC_CLIENT_INPUTAGENT_USERACTION_H_

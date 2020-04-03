@@ -9,7 +9,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
-#include "Map.h"
+#include "ClientMap.h"
 #include "../GraphicAgent/GraphicAgent.h"
 #include "../InputAgent/InputAgent.h"
 #include "../TCPSocketAgent/TCPSocketAgent.h"
@@ -29,8 +29,8 @@ class ClientAgent {
   void Close();
 
  private:
-  sf::RenderWindow& window_;
-  Map map_;
+  sf::RenderWindow &window_;
+  ClientMap map_;
   GraphicAgent::GraphicAgent graphic_agent_;
   InputAgent::InputAgent input_agent_;
   TCPSocketAgent::TCPSocketAgent tcp_socket_agent_;

@@ -6,14 +6,14 @@
 #define GAME_SRC_CLIENT_UDPSOCKETAGENT_UDPSOCKETAGENT_H_
 
 #include <string>
-#include "../ClientAgent/Map.h"
+#include "../ClientAgent/ClientMap.h"
 
 
 namespace Client::UDPSocketAgent {
 
 class UDPSocketAgent {
  public:
-  explicit UDPSocketAgent(Map &main_map);
+  explicit UDPSocketAgent(ClientMap &main_map);
 
   void Initialize(const std::string &host, size_t port);
 
@@ -22,7 +22,7 @@ class UDPSocketAgent {
   void Close();
 
  private:
-  Map &main_map_;
+  ClientMap &main_map_;
 };
 
 }

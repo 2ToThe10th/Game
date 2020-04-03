@@ -5,8 +5,6 @@
 #include "ClientAgent.h"
 #include "../../Marshaling.h"
 
-#include <iostream>
-
 
 namespace Client {
 
@@ -40,7 +38,7 @@ void ClientAgent::RunGame() {
         input_agent_.HandleEvent(event);
       }
     }
-    InputAgent::UserAction user_action = input_agent_.GetUserAction();
+    UserAction user_action = input_agent_.GetUserAction();
     if (user_action.HasSomethingToSend()) {
       udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPSocket(user_action));
     }
@@ -60,10 +58,10 @@ void ClientAgent::InitGame(const std::string &host,
                            size_t udp_port,
                            size_t tcp_port,
                            sf::RenderWindow &window) {
-  Map map;
+  ServerMap map;
 
   sf::Image image;
-  if (!image.loadFromFile("/home/sasha/Game/res/Map.png")) {
+  if (!image.loadFromFile("/home/sasha/Game/res/ServerMap.png")) {
     std::cout << "oy" << std::endl;
     return;
   }

@@ -16,9 +16,9 @@
 
 namespace Client {
 
-class Map {
+class ClientMap {
  public:
-  Map() = default;
+  ClientMap() = default;
 
   void AddPlayer(const Player &new_player, size_t new_id);
 
@@ -28,7 +28,7 @@ class Map {
 
   [[nodiscard]] Location GetPlayerLocation(size_t player_id);
 
-  virtual ~Map() = default;
+  virtual ~ClientMap() = default;
 
  private:
   std::vector<Player> players_;

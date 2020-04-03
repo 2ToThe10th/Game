@@ -9,7 +9,7 @@ namespace Marshaling {
 
 void AngleToString(Angle angle, std::string &action_string);
 
-std::string FromInputToUDPSocket(Client::InputAgent::UserAction user_input) {
+std::string FromInputToUDPSocket(UserAction user_input) {
 
   std::string action_string;
   AngleToString(user_input.GetAngle(), action_string);

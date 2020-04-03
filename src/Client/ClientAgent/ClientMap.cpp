@@ -4,7 +4,7 @@
 // on 23.03.2020.
 //
 
-#include "Map.h"
+#include "ClientMap.h"
 
 #include <iostream>
 #include <mutex>

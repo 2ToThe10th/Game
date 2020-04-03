@@ -1,0 +1,16 @@
+//
+// Created by 2ToThe10th on 03.04.2020.
+//
+
+#ifndef GAME_SRC_SERVER_UDPSOCKETAGENT_UDPSOCKETAGENT_H_
+#define GAME_SRC_SERVER_UDPSOCKETAGENT_UDPSOCKETAGENT_H_
+
+namespace Server::UDPSocketAgent {
+
+class UDPSocketAgent {
+
+};
+
+}
+
+#endif //GAME_SRC_SERVER_UDPSOCKETAGENT_UDPSOCKETAGENT_H_

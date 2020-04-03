@@ -4,7 +4,6 @@
 
 #include "UserAction.h"
 
-namespace Client::InputAgent {
 
 UserAction::UserAction() {
   angle_ = Angle::None;
@@ -22,9 +21,7 @@ bool UserAction::HasSomethingToSend() {
   return angle_ != Angle::None;
 }
 
-UserAction Client::InputAgent::UserAction::Nothing() {
+UserAction UserAction::Nothing() {
   UserAction user_action;
   return user_action;
-}
-
 }

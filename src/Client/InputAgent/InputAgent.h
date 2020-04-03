@@ -9,7 +9,7 @@
 #include <vector>
 #include <chrono>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "UserAction.h"
+#include "../../UserAction.h"
 
 
 namespace Client::InputAgent {
@@ -20,7 +20,7 @@ class InputAgent {
  public:
   InputAgent();
 
-  void Initialize(sf::RenderWindow& window) const;
+  void Initialize(sf::RenderWindow &window) const;
 
   void HandleEvent(sf::Event &event);
 

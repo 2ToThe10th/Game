@@ -5,16 +5,16 @@
 #ifndef GAME_SRC_CLIENTGRAPHICAGENT_GRAPHICMAP_H_
 #define GAME_SRC_CLIENTGRAPHICAGENT_GRAPHICMAP_H_
 
-#include "../ClientAgent/Map.h"
+#include "../ClientAgent/ClientMap.h"
 
 
 namespace Client::GraphicAgent {
 
 class GraphicMap {
  public:
-  explicit GraphicMap(Map &main_map);
+  explicit GraphicMap(ClientMap &main_map);
  private:
-  Map &main_map_;
+  ClientMap &main_map_;
   size_t last_syncronize;
 };
 }

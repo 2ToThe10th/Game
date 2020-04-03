@@ -10,7 +10,15 @@
 
 namespace TCPSocketHelper {
 
+class InetAtonExeption : public std::exception {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "inet aton";
+  }
+};
+
 void WriteAll(int socket_fd, char *buffer, size_t buffer_size);
+
+void ReadAll(int socket_fd, char *buffer, size_t buffer_size);
 
 };
 
