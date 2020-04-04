@@ -8,6 +8,7 @@
 #include <string>
 #include <thread>
 #include "../ClientAgent/ClientMap.h"
+#include "../../TCPSocketHelper.h"
 
 
 namespace Client::TCPSocketAgent {
@@ -16,7 +17,7 @@ class TCPSocketAgent {
  public:
   explicit TCPSocketAgent(ClientMap &main_map);
 
-  void Initialize(const std::string &host, size_t port, sf::Image &image);
+  [[nodiscard]] size_t Initialize(const std::string &host, size_t port, sf::Image &image);
 
   void Close();
 
@@ -27,11 +28,13 @@ class TCPSocketAgent {
   int socket_ = -1;
 
   static constexpr size_t kMaxReadForOneTime = 1024;
+  static constexpr size_t kTimeoutMillisecond = 1000;
 
  private:
   void Connect(const std::string &host, size_t port);
   void RunTCPRead();
   void ReceiveImage(sf::Image& image);
+  [[nodiscard]] TCPSocketHelper::ConstBuffer GetCurrentSituation();
 };
 
 }

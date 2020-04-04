@@ -18,7 +18,7 @@ class ServerAgent {
  public:
   explicit ServerAgent();
 
-  void InitServer(const std::string &host, size_t tcp_port, size_t udp_port);
+  void InitServer(size_t tcp_port, size_t udp_port, const std::string &image_file);
 
   void RunServer();
 

@@ -8,18 +8,103 @@
 
 #include <iostream>
 #include <mutex>
+#include <cstring>
 
 
 namespace Server {
 
+class ImageLoadException : public std::exception {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "could not load image";
+  }
+};
+
 void ServerMap::LoadImageFromFile(const std::string &image_file) {
   if (!background_.loadFromFile(image_file)) {
-    throw std::system_error();
+    throw ImageLoadException();
   }
-  std::cout << "Ok" << std::endl;
 }
 
 const sf::Image &ServerMap::GetImage() {
   return background_;
 }
+
+class AddPlayerException : public std::exception {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "could not load image";
+  }
+};
+
+size_t ServerMap::AddPlayer() {
+  std::unique_lock lock(mutex_);
+  if (number_of_players_ == players_.size()) {
+    players_.push_back(new Player("player", Location(100, 100)));
+    ++number_of_players_;
+    return number_of_players_ - 1;
+  } else {
+    ++number_of_players_;
+    for (size_t i = 0; i < players_.size(); ++i) {
+      if (players_[i] == nullptr) {
+        players_[i] = new Player("player", Location(100, 100));
+        return i;
+      }
+    }
+  }
+  throw AddPlayerException();
+}
+
+void ServerMap::DeletePlayer(size_t player_id) {
+  // TODO: udp notification
+  std::unique_lock lock(mutex_);
+  if (players_[player_id] != nullptr) {
+    delete players_[player_id];
+    players_[player_id] = nullptr;
+  }
+  while (players_.back() == nullptr) {
+    players_.pop_back();
+  }
+  --number_of_players_;
+}
+
+TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
+  std::unique_lock lock(mutex_);
+  // TODO: Update from queue
+
+  size_t buffer_size = number_of_players_ * sizeof(unsigned) * 3;
+
+  char *buffer = new char[buffer_size];
+
+  int position_in_buffer = 0;
+
+  for (unsigned i = 0; i < players_.size(); ++i) {
+    std::cout << i << "  ";
+    if (players_[i] == nullptr) {
+      std::cout << "nullptr";
+    } else {
+      std::cout << players_[i]->GetLocation().GetX() << " "
+                << players_[i]->GetLocation().GetY();
+    }
+    std::cout << std::endl;
+    if (players_[i] != nullptr) {
+      memcpy(buffer + position_in_buffer, &i, sizeof(i));
+      position_in_buffer += sizeof(i);
+      unsigned player_x = players_[i]->GetLocation().GetX();
+      memcpy(buffer + position_in_buffer, &player_x, sizeof(player_x));
+      position_in_buffer += sizeof(player_x);
+      unsigned player_y = players_[i]->GetLocation().GetY();
+      memcpy(buffer + position_in_buffer, &player_y, sizeof(player_y));
+      position_in_buffer += sizeof(player_y);
+    }
+  }
+
+  return TCPSocketHelper::ConstBuffer(buffer, buffer_size);
+}
+
+void ServerMap::SetPlayerLocation(size_t player_id, Location new_location) {
+  std::unique_lock lock(mutex_);
+  if (player_id > players_.size() && players_[player_id] != nullptr) {
+    players_[player_id]->SetLocation(new_location);
+  }
+}
+
 }  // namespace Server

@@ -4,13 +4,15 @@
 
 #include <unistd.h>
 #include <system_error>
+#include <fcntl.h>
+#include <sys/epoll.h>
 
 #include "TCPSocketHelper.h"
 
 
 namespace TCPSocketHelper {
 
-void WriteAll(int socket_fd, char *buffer, size_t buffer_size) {
+void WriteAll(int socket_fd, const char *buffer, size_t buffer_size) {
   size_t already_written = 0;
   while (buffer_size > 0) {
     int was_written = write(socket_fd, buffer + already_written, buffer_size);
@@ -32,6 +34,75 @@ void ReadAll(int socket_fd, char *buffer, size_t buffer_size) {
     already_read += was_read;
     buffer_size -= was_read;
   }
+}
+
+void MakeNonblock(int socket_fd) {
+  int flags = fcntl(socket_fd, F_GETFL);
+  if (flags < 0) {
+    throw std::system_error(errno, std::generic_category());
+  }
+  flags |= O_NONBLOCK;
+  if (fcntl(socket_fd, F_SETFL, flags) < 0) {
+    throw std::system_error(errno, std::generic_category());
+  }
+}
+
+bool WouldBlock() {
+  return errno == EWOULDBLOCK || errno == EAGAIN;
+}
+
+EpollOneReturn::EpollOneReturn() {
+  epoll_fd_ = epoll_create(1);
+  if (epoll_fd_ < 1) {
+    throw std::system_error(errno, std::generic_category());
+  }
+}
+
+void EpollOneReturn::Add(int socket, void *data) {
+  struct epoll_event event{};
+  event.events = EPOLLIN;
+  event.data.ptr = data;
+  if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket, &event) < 0) {
+    throw std::system_error(errno, std::generic_category());
+  }
+}
+
+bool EpollOneReturn::Wait(int timeout_millisecond) {
+  struct epoll_event epoll_event{};
+  return epoll_wait(epoll_fd_, &epoll_event, 1, timeout_millisecond) > 0;
+}
+
+EpollOneReturn::~EpollOneReturn() {
+  close(epoll_fd_);
+}
+
+ConstBuffer::ConstBuffer(char *ptr, size_t size) : buffer_(ptr), size_(size) {
+
+}
+
+char *ConstBuffer::GetBuffer() {
+  return buffer_;
+}
+
+size_t ConstBuffer::GetSize() {
+  return size_;
+}
+
+void ConstBuffer::WriteTo(int socket_fd) const {
+  WriteAll(socket_fd, reinterpret_cast<const char *>(&size_), sizeof(size_));
+  WriteAll(socket_fd, buffer_, size_);
+}
+
+ConstBuffer ConstBuffer::ReadFrom(int socket_fd) {
+  size_t size;
+  ReadAll(socket_fd, reinterpret_cast<char *>(&size), sizeof(size));
+  char *buffer = new char[size];
+  ReadAll(socket_fd, buffer, size);
+  return ConstBuffer(buffer, size);
+}
+
+ConstBuffer::~ConstBuffer() {
+  delete buffer_;
 }
 
 }

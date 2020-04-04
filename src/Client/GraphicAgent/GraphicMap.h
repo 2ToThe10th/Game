@@ -14,6 +14,7 @@ class GraphicMap {
  public:
   explicit GraphicMap(ClientMap &main_map);
  private:
+ public: //TODO: delete it
   ClientMap &main_map_;
   size_t last_syncronize;
 };

@@ -2,6 +2,7 @@
 // Created by 2ToThe10th on 23.03.2020.
 //
 
+#include <iostream>
 #include "ClientAgent.h"
 #include "../../Marshaling.h"
 
@@ -22,7 +23,7 @@ void ClientAgent::InitGame(const std::string &host, const size_t tcp_port, const
 
   sf::Image image;
 
-  tcp_socket_agent_.Initialize(host, tcp_port, image);
+  std::cout << tcp_socket_agent_.Initialize(host, tcp_port, image) << std::endl;
   udp_socket_agent_.Initialize(host, udp_port);
 
   graphic_agent_.Initialize(std::move(image));

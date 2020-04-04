@@ -14,8 +14,7 @@
 #endif
 
 #ifdef SERVER
-#include "Server/TCPSocketAgent/TCPSocketAgent.h"
-#include "Server/ServerAgent/ServerMap.h"
+#include "Server/ServerAgent/ServerAgent.h"
 
 
 #endif
@@ -34,18 +33,14 @@ int main(int argc, char *argv[]) {
 #ifdef SERVER
   assert(argc == 4);
 
-  Server::ServerMap map_;
-  Server::TCPSocketAgent::TCPSocketAgent tcp_socket_agent(map_);
+  Server::ServerAgent server_agent;
 
-  map_.LoadImageFromFile(argv[3]);
+  server_agent.InitServer(strtoul(argv[1], nullptr, 10),
+                          strtoul(argv[2], nullptr, 10), argv[3]);
 
-  tcp_socket_agent.Initialize(
-      strtoul(argv[1], nullptr, 10));
+  server_agent.RunServer();
 
-  int t;
-  std::cin >> t;
-
-  tcp_socket_agent.Close();
+  server_agent.Close();
 
   return 0;
 #endif

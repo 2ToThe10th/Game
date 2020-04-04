@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "../../Player.h"
+#include "../../TCPSocketHelper.h"
 
 
 namespace Client {
@@ -20,20 +21,22 @@ class ClientMap {
  public:
   ClientMap() = default;
 
-  void AddPlayer(const Player &new_player, size_t new_id);
-
-  void DeletePlayer(size_t player_id);
-
   void SetPlayerLocation(size_t player_id, Location new_location);
 
   [[nodiscard]] Location GetPlayerLocation(size_t player_id);
 
+  void UpdateByConstBuffer(TCPSocketHelper::ConstBuffer& const_buffer);
+
   virtual ~ClientMap() = default;
 
  private:
-  std::vector<Player> players_;
+ public: //TODO: delete
+  std::vector<Player*> players_;
   std::shared_mutex mutex_;
   size_t number_of_changes_ = 0;
+
+ private:
+  void DeletePlayersFromTo(size_t from, size_t to);
 };
 
 }  // namespace Client

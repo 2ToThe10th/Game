@@ -17,15 +17,24 @@ TCPSocketAgent::TCPSocketAgent(ClientMap &main_map) : main_map_(main_map) {
 
 }
 
-void TCPSocketAgent::Initialize(const std::string &host, const size_t port, sf::Image &image) {
+size_t TCPSocketAgent::Initialize(const std::string &host, const size_t port, sf::Image &image) {
 
   Connect(host, port);
 
   ReceiveImage(image);
 
+  std::cout << "Start Reading" << std::endl;
+
+  size_t player_id;
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&player_id), sizeof(player_id));
+
+  std::cout << "End Reading" << std::endl;
+
   tcp_read_thread_ = std::thread([this]() {
     this->RunTCPRead();
   });
+
+  return player_id;
 }
 
 void TCPSocketAgent::Connect(const std::string &host, size_t port) {
@@ -39,7 +48,7 @@ void TCPSocketAgent::Connect(const std::string &host, size_t port) {
   server_address.sin_port = htons(port);
 
   if (inet_aton(host.c_str(), &server_address.sin_addr) != 1) {
-    throw TCPSocketHelper::InetAtonExeption();
+    throw TCPSocketHelper::InetAtonException();
   }
 
   if (connect(socket_, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
@@ -50,30 +59,38 @@ void TCPSocketAgent::Connect(const std::string &host, size_t port) {
 void TCPSocketAgent::ReceiveImage(sf::Image &image) {
   int height = 0;
   int width = 0;
-  TCPSocketHelper::ReadAll(socket_, (char *) &height, sizeof(int));
-  TCPSocketHelper::ReadAll(socket_, (char *) &width, sizeof(int));
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&height), sizeof(int));
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&width), sizeof(int));
   auto array_of_image = new sf::Uint8[height * width * 4];
-  TCPSocketHelper::ReadAll(socket_, (char *) array_of_image, height * width * 4);
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (array_of_image), height * width * 4);
   image.create(width, height, array_of_image);
 }
 
 void TCPSocketAgent::Close() {
   is_work_ = false;
-  tcp_read_thread_.join();
+  if (tcp_read_thread_.joinable()) {
+    tcp_read_thread_.join();
+  }
   shutdown(socket_, SHUT_RDWR);
   close(socket_);
 }
 
 void TCPSocketAgent::RunTCPRead() {
-  char buffer[kMaxReadForOneTime + 1];//TODO: delete + 1
+
+  auto epoll = TCPSocketHelper::EpollOneReturn();
+
+  epoll.Add(socket_, nullptr);
+
   while (is_work_) {
-    size_t was_read = read(socket_, buffer, kMaxReadForOneTime);
-
-    buffer[was_read] = '\0';
-
-    std::cout << "------------------------------\n" << was_read << "\n" << buffer
-              << "\n------------------------------" << std::endl;
+    if (epoll.Wait(kTimeoutMillisecond)) {
+      auto buffer = GetCurrentSituation();
+      main_map_.UpdateByConstBuffer(buffer);
+    }
   }
+}
+
+TCPSocketHelper::ConstBuffer TCPSocketAgent::GetCurrentSituation() {
+  return TCPSocketHelper::ConstBuffer::ReadFrom(socket_);
 }
 
 }

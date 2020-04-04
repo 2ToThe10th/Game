@@ -29,6 +29,8 @@ class GraphicAgent {
   sf::RenderWindow &window_;
   sf::Texture texture_;
 
+
+  sf::Font font_; // TODO: delete
 };
 }
 #endif //GAME_SRC_GAMEGRAPHIC_H_
