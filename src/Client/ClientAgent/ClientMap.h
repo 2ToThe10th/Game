@@ -21,22 +21,22 @@ class ClientMap {
  public:
   ClientMap() = default;
 
-  void SetPlayerLocation(size_t player_id, Location new_location);
+  void SetPlayerLocation(unsigned int player_id, Location new_location);
 
-  [[nodiscard]] Location GetPlayerLocation(size_t player_id);
+  [[nodiscard]] Location GetPlayerLocation(unsigned int player_id);
 
-  void UpdateByConstBuffer(TCPSocketHelper::ConstBuffer& const_buffer);
+  void UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer);
 
   virtual ~ClientMap() = default;
 
  private:
  public: //TODO: delete
-  std::vector<Player*> players_;
+  std::vector<Player *> players_;
   std::shared_mutex mutex_;
   size_t number_of_changes_ = 0;
 
  private:
-  void DeletePlayersFromTo(size_t from, size_t to);
+  void DeletePlayersFromTo(unsigned int from, unsigned int to);
 };
 
 }  // namespace Client

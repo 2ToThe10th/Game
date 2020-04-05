@@ -11,7 +11,9 @@
 
 namespace Marshaling {
 
-std::string FromInputToUDPSocket(UserAction user_input);
+std::string FromInputToUDPMessage(UserAction user_input);
+
+UserAction FromUDPMessageToUserAction(const char *buffer, size_t buffer_size);
 
 };
 

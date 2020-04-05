@@ -17,7 +17,7 @@ class TCPSocketAgent {
  public:
   explicit TCPSocketAgent(ClientMap &main_map);
 
-  [[nodiscard]] size_t Initialize(const std::string &host, size_t port, sf::Image &image);
+  [[nodiscard]] unsigned Initialize(const std::string &host, size_t port, sf::Image &image);
 
   void Close();
 
@@ -33,7 +33,7 @@ class TCPSocketAgent {
  private:
   void Connect(const std::string &host, size_t port);
   void RunTCPRead();
-  void ReceiveImage(sf::Image& image);
+  void ReceiveImage(sf::Image &image);
   [[nodiscard]] TCPSocketHelper::ConstBuffer GetCurrentSituation();
 };
 

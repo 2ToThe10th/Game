@@ -23,25 +23,25 @@ class ServerMap {
 
   void LoadImageFromFile(const std::string &image_file);
 
-  const sf::Image& GetImage();
+  const sf::Image &GetImage();
 
-  size_t AddPlayer(); // get new player id
+  unsigned AddPlayer(); // get new player id
 
-  void DeletePlayer(size_t player_id);
+  void DeletePlayer(unsigned int player_id);
 
   TCPSocketHelper::ConstBuffer GetCurrentInfo();
 
-  void SetPlayerLocation(size_t player_id, Location new_location);
-//
-//  [[nodiscard]] Location GetPlayerLocation(size_t player_id);
+  void SetPlayerLocation(unsigned player_id, Location new_location);
+
+  [[nodiscard]] Location GetPlayerLocation(unsigned player_id);
 
   virtual ~ServerMap() = default;
 
  private:
-  std::vector<Player*> players_;
+  std::vector<Player *> players_;
   std::shared_mutex mutex_;
   sf::Image background_;
-  size_t number_of_players_ = 0;
+  unsigned number_of_players_ = 0;
   // + 2 queue for Agents
 
 };

@@ -9,21 +9,21 @@ class Location {
  public:
   Location() = default;
 
-  Location(unsigned x, unsigned y);
+  Location(float x, float y);
 
   Location(const Location &location);
 
-  [[nodiscard]] unsigned GetX() const;
+  [[nodiscard]] float GetX() const;
 
-  [[nodiscard]] unsigned GetY() const;
+  [[nodiscard]] float GetY() const;
 
-  void SetX(unsigned x);
+  void SetX(float x);
 
-  void SetY(unsigned y);
+  void SetY(float y);
 
  private:
-  unsigned x_ = 0;
-  unsigned y_ = 0;
+  float x_ = 0;
+  float y_ = 0;
 };
 
 #endif //GAME_SRC_LOCATION_H_

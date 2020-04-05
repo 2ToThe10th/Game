@@ -23,8 +23,8 @@ void ClientAgent::InitGame(const std::string &host, const size_t tcp_port, const
 
   sf::Image image;
 
-  std::cout << tcp_socket_agent_.Initialize(host, tcp_port, image) << std::endl;
-  udp_socket_agent_.Initialize(host, udp_port);
+  unsigned player_id = tcp_socket_agent_.Initialize(host, tcp_port, image);
+  udp_socket_agent_.Initialize(host, udp_port, player_id);
 
   graphic_agent_.Initialize(std::move(image));
 }
@@ -41,7 +41,7 @@ void ClientAgent::RunGame() {
     }
     UserAction user_action = input_agent_.GetUserAction();
     if (user_action.HasSomethingToSend()) {
-      udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPSocket(user_action));
+      udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(user_action));
     }
     graphic_agent_.Draw();
   }

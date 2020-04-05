@@ -25,3 +25,4 @@ UserAction UserAction::Nothing() {
   UserAction user_action;
   return user_action;
 }
+

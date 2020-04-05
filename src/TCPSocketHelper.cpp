@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <system_error>
 #include <fcntl.h>
-#include <sys/epoll.h>
+#include <sys/socket.h>
 
 #include "TCPSocketHelper.h"
 
@@ -15,7 +15,7 @@ namespace TCPSocketHelper {
 void WriteAll(int socket_fd, const char *buffer, size_t buffer_size) {
   size_t already_written = 0;
   while (buffer_size > 0) {
-    int was_written = write(socket_fd, buffer + already_written, buffer_size);
+    int was_written = send(socket_fd, buffer + already_written, buffer_size, MSG_NOSIGNAL);
     if (was_written < 0) {
       throw std::system_error(errno, std::generic_category());
     }
@@ -51,31 +51,6 @@ bool WouldBlock() {
   return errno == EWOULDBLOCK || errno == EAGAIN;
 }
 
-EpollOneReturn::EpollOneReturn() {
-  epoll_fd_ = epoll_create(1);
-  if (epoll_fd_ < 1) {
-    throw std::system_error(errno, std::generic_category());
-  }
-}
-
-void EpollOneReturn::Add(int socket, void *data) {
-  struct epoll_event event{};
-  event.events = EPOLLIN;
-  event.data.ptr = data;
-  if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket, &event) < 0) {
-    throw std::system_error(errno, std::generic_category());
-  }
-}
-
-bool EpollOneReturn::Wait(int timeout_millisecond) {
-  struct epoll_event epoll_event{};
-  return epoll_wait(epoll_fd_, &epoll_event, 1, timeout_millisecond) > 0;
-}
-
-EpollOneReturn::~EpollOneReturn() {
-  close(epoll_fd_);
-}
-
 ConstBuffer::ConstBuffer(char *ptr, size_t size) : buffer_(ptr), size_(size) {
 
 }
@@ -102,7 +77,9 @@ ConstBuffer ConstBuffer::ReadFrom(int socket_fd) {
 }
 
 ConstBuffer::~ConstBuffer() {
-  delete buffer_;
+  if (size_ > 0) {
+    delete[] buffer_;
+  }
 }
 
 }

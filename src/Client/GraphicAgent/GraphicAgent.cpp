@@ -24,7 +24,6 @@ void GraphicAgent::Draw() {
 
   window_.draw(sf::Sprite(texture_));
 
-
   std::string current_situation;
 
   int i = 0;
@@ -39,7 +38,7 @@ void GraphicAgent::Draw() {
       current_situation += ", ";
       current_situation += std::to_string(player->GetLocation().GetY());
       current_situation += "\n";
-      }
+    }
     ++i;
   }
 

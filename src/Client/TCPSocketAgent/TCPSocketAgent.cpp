@@ -10,6 +10,7 @@
 #include <iostream>
 #include "TCPSocketAgent.h"
 #include "../../TCPSocketHelper.h"
+#include "../../EpollOneReturn.h"
 
 
 namespace Client::TCPSocketAgent {
@@ -17,18 +18,14 @@ TCPSocketAgent::TCPSocketAgent(ClientMap &main_map) : main_map_(main_map) {
 
 }
 
-size_t TCPSocketAgent::Initialize(const std::string &host, const size_t port, sf::Image &image) {
+unsigned TCPSocketAgent::Initialize(const std::string &host, const size_t port, sf::Image &image) {
 
   Connect(host, port);
 
   ReceiveImage(image);
 
-  std::cout << "Start Reading" << std::endl;
-
-  size_t player_id;
+  unsigned player_id;
   TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&player_id), sizeof(player_id));
-
-  std::cout << "End Reading" << std::endl;
 
   tcp_read_thread_ = std::thread([this]() {
     this->RunTCPRead();
@@ -57,13 +54,14 @@ void TCPSocketAgent::Connect(const std::string &host, size_t port) {
 }
 
 void TCPSocketAgent::ReceiveImage(sf::Image &image) {
-  int height = 0;
-  int width = 0;
-  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&height), sizeof(int));
-  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&width), sizeof(int));
+  unsigned height = 0;
+  unsigned width = 0;
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&height), sizeof(height));
+  TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (&width), sizeof(width));
   auto array_of_image = new sf::Uint8[height * width * 4];
   TCPSocketHelper::ReadAll(socket_, reinterpret_cast<char *> (array_of_image), height * width * 4);
   image.create(width, height, array_of_image);
+  delete[] array_of_image;
 }
 
 void TCPSocketAgent::Close() {
@@ -77,7 +75,7 @@ void TCPSocketAgent::Close() {
 
 void TCPSocketAgent::RunTCPRead() {
 
-  auto epoll = TCPSocketHelper::EpollOneReturn();
+  auto epoll = EpollOneReturn();
 
   epoll.Add(socket_, nullptr);
 

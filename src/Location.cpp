@@ -5,25 +5,25 @@
 #include "Location.h"
 
 
-Location::Location(unsigned x, unsigned y) : x_(x), y_(y) {}
+Location::Location(float x, float y) : x_(x), y_(y) {}
 
 Location::Location(const Location &location) {
   x_ = location.x_;
   y_ = location.y_;
 }
 
-unsigned Location::GetX() const {
+float Location::GetX() const {
   return x_;
 }
 
-unsigned Location::GetY() const {
+float Location::GetY() const {
   return y_;
 }
 
-void Location::SetX(unsigned x) {
+void Location::SetX(float x) {
   x_ = x;
 }
 
-void Location::SetY(unsigned y) {
+void Location::SetY(float y) {
   y_ = y;
 }

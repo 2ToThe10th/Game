@@ -5,7 +5,9 @@
 #ifndef GAME_SRC_CLIENT_INPUTAGENT_USERACTION_H_
 #define GAME_SRC_CLIENT_INPUTAGENT_USERACTION_H_
 
+#include <cstdlib>
 #include "Angle.h"
+
 
 class UserAction {
  public:

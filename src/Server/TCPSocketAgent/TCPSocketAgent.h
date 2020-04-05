@@ -30,7 +30,6 @@ class TCPSocketAgent {
   bool is_work_ = true;
   int accept_socket_ = -1;
 
-  static constexpr size_t kMaxReadForOneTime = 1024;
   static constexpr size_t kEpollTimeoutMillisecond = 1000;
   static constexpr Duration kWriteAllPeriod = Duration(1000);
 
@@ -38,7 +37,6 @@ class TCPSocketAgent {
   void AcceptLoop();
   void SendImage(int socket);
   void SetAndSendPlayerId(int client_socket);
-  void SendCurrentSituation(int client_socket);
 
   void WriteLoop();
 };

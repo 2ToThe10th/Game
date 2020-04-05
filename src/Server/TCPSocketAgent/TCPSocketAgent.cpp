@@ -7,9 +7,8 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <signal.h>
 #include "TCPSocketAgent.h"
-#include "../../TCPSocketHelper.h"
+#include "../../EpollOneReturn.h"
 
 
 namespace Server::TCPSocketAgent {
@@ -19,9 +18,6 @@ TCPSocketAgent::TCPSocketAgent(ServerMap &main_map) : main_map_(main_map) {
 }
 
 void TCPSocketAgent::Initialize(size_t port) {
-  sigset_t set;
-  sigfillset(&set);
-  sigprocmask(SIG_SETMASK, &set, nullptr);
 
   accept_socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (accept_socket_ < 0) {
@@ -56,7 +52,7 @@ void TCPSocketAgent::Initialize(size_t port) {
 
 void TCPSocketAgent::AcceptLoop() {
 
-  auto epoll = TCPSocketHelper::EpollOneReturn();
+  auto epoll = EpollOneReturn();
 
   TCPSocketHelper::MakeNonblock(accept_socket_);
   epoll.Add(accept_socket_, nullptr);
@@ -83,17 +79,17 @@ void TCPSocketAgent::AcceptLoop() {
 }
 
 void TCPSocketAgent::SendImage(int socket) {
-  int height = main_map_.GetImage().getSize().y;
-  int width = main_map_.GetImage().getSize().x;
-  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&height), sizeof(int));
-  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&width), sizeof(int));
+  unsigned height = main_map_.GetImage().getSize().y;
+  unsigned width = main_map_.GetImage().getSize().x;
+  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&height), sizeof(height));
+  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&width), sizeof(width));
   TCPSocketHelper::WriteAll(socket,
                             reinterpret_cast<const char *> (main_map_.GetImage().getPixelsPtr()),
                             4 * height * width);
 }
 
 void TCPSocketAgent::SetAndSendPlayerId(int client_socket) {
-  size_t client_id = main_map_.AddPlayer();
+  unsigned client_id = main_map_.AddPlayer();
 
   if (client_id >= client_sockets_.size()) {
     client_sockets_.resize(client_id + 1, -1);
@@ -120,8 +116,8 @@ void TCPSocketAgent::Close() {
 void TCPSocketAgent::WriteLoop() {
   while (is_work_) {
     auto buffer = main_map_.GetCurrentInfo();
-    size_t player_id = 0;
-    for (auto& socket: client_sockets_) {
+    unsigned player_id = 0;
+    for (auto &socket: client_sockets_) {
       if (socket > -1) {
         try {
           buffer.WriteTo(socket);

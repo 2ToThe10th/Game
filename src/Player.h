@@ -12,16 +12,25 @@
 
 class Player {
  public:
+  explicit Player() = default;
+
   explicit Player(std::string name, const Location &start_location);
 
   [[nodiscard]] const Location &GetLocation() const;
 
   void SetLocation(const Location &location);
 
+  constexpr static size_t LengthToSend() { // return Length that will be writen by ToSend()
+    return 2 * sizeof(float);
+  }
+
+  void ToSend(char *buffer);
+
+  void UpdateFromFromString(char *buffer);
+
  private:
   Location location_;
   std::string name_;
-  bool is_valid;
  private:
 };
 

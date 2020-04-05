@@ -9,7 +9,7 @@
 namespace Server {
 
 ServerAgent::ServerAgent()
-    : map_(), physical_agent_(), tcp_socket_agent_(map_), udp_socket_agent_() {
+    : map_(), physical_agent_(), tcp_socket_agent_(map_), udp_socket_agent_(map_) {
 
 }
 
@@ -17,6 +17,8 @@ void ServerAgent::InitServer(size_t tcp_port, size_t udp_port, const std::string
   map_.LoadImageFromFile(image_file);
 
   tcp_socket_agent_.Initialize(tcp_port);
+  udp_socket_agent_.Initialize(udp_port);
+
 }
 
 void ServerAgent::RunServer() {
@@ -26,6 +28,7 @@ void ServerAgent::RunServer() {
 
 void ServerAgent::Close() {
   tcp_socket_agent_.Close();
+  udp_socket_agent_.Close();
 }
 
 }

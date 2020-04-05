@@ -29,7 +29,6 @@ class GraphicAgent {
   sf::RenderWindow &window_;
   sf::Texture texture_;
 
-
   sf::Font font_; // TODO: delete
 };
 }

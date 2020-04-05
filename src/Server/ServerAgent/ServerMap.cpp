@@ -35,7 +35,7 @@ class AddPlayerException : public std::exception {
   }
 };
 
-size_t ServerMap::AddPlayer() {
+unsigned ServerMap::AddPlayer() {
   std::unique_lock lock(mutex_);
   if (number_of_players_ == players_.size()) {
     players_.push_back(new Player("player", Location(100, 100)));
@@ -53,14 +53,14 @@ size_t ServerMap::AddPlayer() {
   throw AddPlayerException();
 }
 
-void ServerMap::DeletePlayer(size_t player_id) {
+void ServerMap::DeletePlayer(unsigned int player_id) {
   // TODO: udp notification
   std::unique_lock lock(mutex_);
   if (players_[player_id] != nullptr) {
     delete players_[player_id];
     players_[player_id] = nullptr;
   }
-  while (players_.back() == nullptr) {
+  while (!players_.empty() && players_.back() == nullptr) {
     players_.pop_back();
   }
   --number_of_players_;
@@ -70,7 +70,11 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
   std::unique_lock lock(mutex_);
   // TODO: Update from queue
 
-  size_t buffer_size = number_of_players_ * sizeof(unsigned) * 3;
+  if (number_of_players_ == 0) {
+    return TCPSocketHelper::ConstBuffer(nullptr, 0);
+  }
+
+  size_t buffer_size = number_of_players_ * (sizeof(unsigned) + 2 * sizeof(float));
 
   char *buffer = new char[buffer_size];
 
@@ -88,22 +92,27 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
     if (players_[i] != nullptr) {
       memcpy(buffer + position_in_buffer, &i, sizeof(i));
       position_in_buffer += sizeof(i);
-      unsigned player_x = players_[i]->GetLocation().GetX();
-      memcpy(buffer + position_in_buffer, &player_x, sizeof(player_x));
-      position_in_buffer += sizeof(player_x);
-      unsigned player_y = players_[i]->GetLocation().GetY();
-      memcpy(buffer + position_in_buffer, &player_y, sizeof(player_y));
-      position_in_buffer += sizeof(player_y);
+      players_[i]->ToSend(buffer + position_in_buffer);
+      position_in_buffer += Player::LengthToSend();
     }
   }
 
   return TCPSocketHelper::ConstBuffer(buffer, buffer_size);
 }
 
-void ServerMap::SetPlayerLocation(size_t player_id, Location new_location) {
+void ServerMap::SetPlayerLocation(unsigned player_id, Location new_location) {
   std::unique_lock lock(mutex_);
-  if (player_id > players_.size() && players_[player_id] != nullptr) {
+  if (player_id < players_.size() && players_[player_id] != nullptr) {
     players_[player_id]->SetLocation(new_location);
+  }
+}
+
+Location ServerMap::GetPlayerLocation(unsigned player_id) {
+  std::unique_lock lock(mutex_);
+  if (player_id < players_.size() && players_[player_id] != nullptr) {
+    return players_[player_id]->GetLocation();
+  } else {
+    return Location();
   }
 }
 

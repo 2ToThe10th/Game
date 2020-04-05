@@ -6,6 +6,7 @@
 #define GAME_SRC_CLIENT_UDPSOCKETAGENT_UDPSOCKETAGENT_H_
 
 #include <string>
+#include <netinet/in.h>
 #include "../ClientAgent/ClientMap.h"
 
 
@@ -15,7 +16,7 @@ class UDPSocketAgent {
  public:
   explicit UDPSocketAgent(ClientMap &main_map);
 
-  void Initialize(const std::string &host, size_t port);
+  void Initialize(const std::string &host, size_t port, unsigned player_id);
 
   void WriteToServer(const std::string &message);
 
@@ -23,6 +24,9 @@ class UDPSocketAgent {
 
  private:
   ClientMap &main_map_;
+  struct sockaddr_in server_addr_;
+  int socket_;
+  unsigned player_id_;
 };
 
 }

@@ -24,25 +24,12 @@ void MakeNonblock(int socket_fd);
 
 bool WouldBlock();
 
-class EpollOneReturn {
- public:
-  EpollOneReturn();
-
-  void Add(int socket, void *data);
-
-  bool Wait(int timeout_millisecond);
-
-  ~EpollOneReturn();
- private:
-  int epoll_fd_;
-};
-
 struct ConstBuffer {
  public:
   ConstBuffer() = delete;
   ConstBuffer(char *ptr, size_t size);
 
-  char* GetBuffer();
+  char *GetBuffer();
 
   size_t GetSize();
 
@@ -53,7 +40,7 @@ struct ConstBuffer {
   ~ConstBuffer();
 
  private:
-  char* buffer_ = nullptr;
+  char *buffer_ = nullptr;
   size_t size_ = 0;
 };
 
