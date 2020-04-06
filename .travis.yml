@@ -9,17 +9,19 @@ os:
 compiler:
   - gcc
 
+install:
+  - sudo apt-get install libsfml-dev
+
 script:
-  - mkdir cmake-build-release
-  - cd cmake-build-release
-  - cmake ../
+  - mkdir cmake-build-client
+  - cd cmake-build-client
+  - cmake ../ -DCLIENT=1
   - make
   - cd ..
-  - mkdir cmake-build-debug
-  - cd cmake-build-debug
-  - cmake ../ -DDEBUG=True
+  - mkdir cmake-build-server
+  - cd cmake-build-server
+  - cmake ../ -DSERVER=1
   - make
-  - ./Game
 
 notifications:
   email:

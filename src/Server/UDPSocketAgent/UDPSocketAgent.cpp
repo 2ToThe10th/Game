@@ -66,8 +66,6 @@ void UDPSocketAgent::ReadLoop() {
           recvfrom(socket_, buffer, kMaxBufferSize + sizeof(unsigned), 0, nullptr, nullptr);
       unsigned player_id = *(int *) buffer;
 
-      buffer[was_received] = '\0';
-
       if (was_received < sizeof(player_id)) {
         throw std::system_error(errno, std::generic_category());
       }
