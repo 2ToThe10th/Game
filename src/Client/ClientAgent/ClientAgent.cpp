@@ -53,21 +53,3 @@ void ClientAgent::Close() {
 }
 
 } // namespace Client
-
-/*
-void ClientAgent::InitGame(const std::string &host,
-                           size_t udp_port,
-                           size_t tcp_port,
-                           sf::RenderWindow &window) {
-  ServerMap map;
-
-  sf::Image image;
-  if (!image.loadFromFile("/home/sasha/Game/res/ServerMap.png")) {
-    std::cout << "oy" << std::endl;
-    return;
-  }
-//  GraphicAgent::GraphicAgent game_graphic(map, window);
-
-//  game_graphic.GameLoop();
-}
-*/
