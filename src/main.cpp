@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
   assert(argc == 4);
   sf::RenderWindow
       window
-      (sf::VideoMode(1000, 800), "Game", sf::Style::Close | sf::Style::Resize);
+      (sf::VideoMode(700, 600), "Game", sf::Style::Close | sf::Style::Resize);
   Client::ClientAgent game_client(window);
   game_client.InitGame(argv[1],
                        strtoul(argv[2], nullptr, 10),

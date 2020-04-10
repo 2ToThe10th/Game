@@ -7,6 +7,7 @@
 
 #include <string>
 #include <netinet/in.h>
+#include <thread>
 #include "../ClientAgent/ClientMap.h"
 
 
@@ -24,9 +25,18 @@ class UDPSocketAgent {
 
  private:
   ClientMap &main_map_;
-  struct sockaddr_in server_addr_;
-  int socket_;
-  unsigned player_id_;
+  struct sockaddr_in server_addr_{};
+  int socket_ = -1;
+  unsigned player_id_ = -1;
+  std::thread udp_receive_from_server_loop_;
+
+  bool is_work_ = true;
+
+  static constexpr size_t kTimeoutMillisecond = 1000;
+  static constexpr size_t kMaxBufferSize = 1024;
+
+ private:
+  void ReceiveFromServer();
 };
 
 }

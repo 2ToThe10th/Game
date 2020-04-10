@@ -13,11 +13,11 @@ class UserAction {
  public:
   UserAction();
 
-  Angle GetAngle();
+  [[nodiscard]] Angle GetAngle() const;
 
   void SetAngle(Angle angle);
 
-  bool HasSomethingToSend();
+  [[nodiscard]] bool HasSomethingToSend() const;
 
   static UserAction Nothing();
 

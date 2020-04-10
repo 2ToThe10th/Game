@@ -8,11 +8,10 @@
 #include <thread>
 
 #include "../ServerAgent/ServerMap.h"
+#include "../../Duration.h"
 
 
 namespace Server::TCPSocketAgent {
-
-using Duration = std::chrono::milliseconds;
 
 class TCPSocketAgent {
  public:
@@ -31,7 +30,7 @@ class TCPSocketAgent {
   int accept_socket_ = -1;
 
   static constexpr size_t kEpollTimeoutMillisecond = 1000;
-  static constexpr Duration kWriteAllPeriod = Duration(1000);
+  static constexpr Time::Duration kWriteAllPeriod = Time::Duration(1000);
 
  private:
   void AcceptLoop();

@@ -5,10 +5,29 @@
 #ifndef GAME_SRC_SERVER_PHYSICALAGENT_PHYSICALAGENT_H_
 #define GAME_SRC_SERVER_PHYSICALAGENT_PHYSICALAGENT_H_
 
+#include <thread>
+#include "../ServerAgent/ServerMap.h"
+
+
 namespace Server::PhysicalAgent {
 
 class PhysicalAgent {
+ public:
+  explicit PhysicalAgent(ServerMap &main_map);
 
+  void Initialize(size_t number_of_thread);
+
+  void Close();
+ private:
+  ServerMap& main_map_;
+  std::vector<std::thread> threads;
+  bool is_work_ = true;
+  static constexpr float kGoRightForOneTick = 0.1;
+  static constexpr float kGoDiagonalForOneTick = kGoRightForOneTick / 1.41421356237;
+
+ private:
+  void PhysicalLoop();
+  void HandleUpdate(UserUpdate user_update);
 };
 
 }

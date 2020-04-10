@@ -15,10 +15,10 @@ EpollOneReturn::EpollOneReturn() {
   }
 }
 
-void EpollOneReturn::Add(int socket, void *data) {
+void EpollOneReturn::Add(int socket) {
   struct epoll_event event{};
   event.events = EPOLLIN;
-  event.data.ptr = data;
+  event.data.ptr = nullptr;
   if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket, &event) < 0) {
     throw std::system_error(errno, std::generic_category());
   }

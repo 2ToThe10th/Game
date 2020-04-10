@@ -9,7 +9,7 @@ UserAction::UserAction() {
   angle_ = Angle::None;
 }
 
-Angle UserAction::GetAngle() {
+Angle UserAction::GetAngle() const {
   return angle_;
 }
 
@@ -17,7 +17,7 @@ void UserAction::SetAngle(Angle angle) {
   angle_ = angle;
 }
 
-bool UserAction::HasSomethingToSend() {
+bool UserAction::HasSomethingToSend() const {
   return angle_ != Angle::None;
 }
 

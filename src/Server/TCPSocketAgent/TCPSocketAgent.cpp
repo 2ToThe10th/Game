@@ -55,7 +55,7 @@ void TCPSocketAgent::AcceptLoop() {
   auto epoll = EpollOneReturn();
 
   TCPSocketHelper::MakeNonblock(accept_socket_);
-  epoll.Add(accept_socket_, nullptr);
+  epoll.Add(accept_socket_);
 
   while (is_work_) {
 

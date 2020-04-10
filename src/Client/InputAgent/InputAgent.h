@@ -10,11 +10,10 @@
 #include <chrono>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "../../UserAction.h"
+#include "../../Duration.h"
 
 
 namespace Client::InputAgent {
-
-using Duration = std::chrono::milliseconds;
 
 class InputAgent {
  public:
@@ -29,12 +28,10 @@ class InputAgent {
  private:
   std::vector<bool> key_pressed_ = std::vector<bool>(sf::Keyboard::KeyCount, false);
 
-  Duration last_send_info_time_;
-  constexpr static auto kSendInterval = Duration(10);
+  Time::Duration last_send_info_time_;
+  constexpr static auto kSendInterval = Time::Duration(10);
 
  private:
-
-  [[nodiscard]] Duration Now() const;
 
   void HandlerKeyPressed(sf::Event &event);
   void HandlerKeyRelease(sf::Event &event);

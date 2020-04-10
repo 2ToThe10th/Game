@@ -7,7 +7,7 @@
 
 namespace Client::InputAgent {
 
-InputAgent::InputAgent() : last_send_info_time_(Now()) {
+InputAgent::InputAgent() : last_send_info_time_(Time::Now()) {
 
 }
 
@@ -33,7 +33,7 @@ void InputAgent::HandlerKeyRelease(sf::Event &event) {
 }
 
 UserAction InputAgent::GetUserAction() const {
-  if (Now() - last_send_info_time_ < kSendInterval) {
+  if (Time::Now() - last_send_info_time_ < kSendInterval) {
     return UserAction::Nothing();
   }
 
@@ -73,10 +73,6 @@ bool InputAgent::IsRightKeyPressed() const {
 
 bool InputAgent::IsLeftKeyPressed() const {
   return key_pressed_[sf::Keyboard::A];
-}
-
-Duration InputAgent::Now() const {
-  return std::chrono::duration_cast<Duration>(std::chrono::steady_clock::now().time_since_epoch());
 }
 
 }

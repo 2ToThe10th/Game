@@ -9,6 +9,7 @@
 #include <iostream>
 #include <mutex>
 #include <cstring>
+#include <iomanip>
 
 
 namespace Server {
@@ -36,7 +37,7 @@ class AddPlayerException : public std::exception {
 };
 
 unsigned ServerMap::AddPlayer() {
-  std::unique_lock lock(mutex_);
+  std::unique_lock lock(mutex_players_);
   if (number_of_players_ == players_.size()) {
     players_.push_back(new Player("player", Location(100, 100)));
     ++number_of_players_;
@@ -55,7 +56,7 @@ unsigned ServerMap::AddPlayer() {
 
 void ServerMap::DeletePlayer(unsigned int player_id) {
   // TODO: udp notification
-  std::unique_lock lock(mutex_);
+  std::unique_lock lock(mutex_players_);
   if (players_[player_id] != nullptr) {
     delete players_[player_id];
     players_[player_id] = nullptr;
@@ -67,8 +68,7 @@ void ServerMap::DeletePlayer(unsigned int player_id) {
 }
 
 TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
-  std::unique_lock lock(mutex_);
-  // TODO: Update from queue
+  std::unique_lock lock(mutex_players_);
 
   if (number_of_players_ == 0) {
     return TCPSocketHelper::ConstBuffer(nullptr, 0);
@@ -100,20 +100,35 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
   return TCPSocketHelper::ConstBuffer(buffer, buffer_size);
 }
 
-void ServerMap::SetPlayerLocation(unsigned player_id, Location new_location) {
-  std::unique_lock lock(mutex_);
-  if (player_id < players_.size() && players_[player_id] != nullptr) {
-    players_[player_id]->SetLocation(new_location);
-  }
-}
-
 Location ServerMap::GetPlayerLocation(unsigned player_id) {
-  std::unique_lock lock(mutex_);
+  std::unique_lock lock(mutex_players_);
   if (player_id < players_.size() && players_[player_id] != nullptr) {
     return players_[player_id]->GetLocation();
   } else {
     return Location();
   }
+}
+
+TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
+  std::unique_lock lock(mutex_players_);
+  auto queue = physics_to_map_queue_.GetQueue();
+
+  size_t length_to_send = (sizeof(unsigned) + Player::LengthToSend()) * queue.size();
+  char* to_send = new char[length_to_send];
+  char* current_position_in_to_send = to_send;
+  while (!queue.empty()) {
+    auto player_state = queue.front();
+    std::cout << "[UDP]" << std::setprecision(10) << player_state.GetPlayerId() << "  " << player_state.GetNewLocation().GetX() << " " << player_state.GetNewLocation().GetY() << std::endl;
+    unsigned player_id = player_state.GetPlayerId();
+    queue.pop();
+    players_[player_id]->SetLocation(player_state.GetNewLocation());
+    memcpy(current_position_in_to_send, &player_id, sizeof(player_id));
+    current_position_in_to_send += sizeof(player_id);
+    players_[player_id]->ToSend(current_position_in_to_send);
+    current_position_in_to_send += Player::LengthToSend();
+  }
+
+  return TCPSocketHelper::ConstBuffer(to_send, length_to_send);
 }
 
 }  // namespace Server

@@ -14,7 +14,7 @@
 namespace Client {
 
 void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) {
-  std::unique_lock lock(mutex_);
+  std::lock_guard lock(mutex_);
   unsigned
       player_in_buffer_number = const_buffer.GetSize() / (sizeof(unsigned) + 2 * sizeof(float));
 
@@ -23,7 +23,7 @@ void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) 
   unsigned after_last_index = 0;
 
   for (unsigned i = 0; i < player_in_buffer_number; ++i) {
-    unsigned player_index = 0; //TODO: make class and function for this lines
+    unsigned player_index = 0;
 
     memcpy(&player_index, buffer, sizeof(player_index));
     buffer += sizeof(player_index);
@@ -56,4 +56,10 @@ void ClientMap::DeletePlayersFromTo(unsigned int from, unsigned int to) {
     }
   }
 }
+
+void ClientMap::UpdatePlayer(unsigned int player_id, char *buffer) {
+  std::lock_guard lock_(mutex_);
+  players_[player_id]->UpdateFromFromString(buffer);
+}
+
 }  // namespace Client

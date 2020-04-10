@@ -77,7 +77,7 @@ void TCPSocketAgent::RunTCPRead() {
 
   auto epoll = EpollOneReturn();
 
-  epoll.Add(socket_, nullptr);
+  epoll.Add(socket_);
 
   while (is_work_) {
     if (epoll.Wait(kTimeoutMillisecond)) {

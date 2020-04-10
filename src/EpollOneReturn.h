@@ -9,7 +9,7 @@ class EpollOneReturn {
  public:
   EpollOneReturn();
 
-  void Add(int socket, void *data);
+  void Add(int socket);
 
   bool Wait(int timeout_millisecond);
 

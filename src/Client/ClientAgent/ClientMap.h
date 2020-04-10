@@ -21,9 +21,7 @@ class ClientMap {
  public:
   ClientMap() = default;
 
-  void SetPlayerLocation(unsigned int player_id, Location new_location);
-
-  [[nodiscard]] Location GetPlayerLocation(unsigned int player_id);
+  void UpdatePlayer(unsigned int player_id, char *buffer);
 
   void UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer);
 
@@ -32,7 +30,7 @@ class ClientMap {
  private:
  public: //TODO: delete
   std::vector<Player *> players_;
-  std::shared_mutex mutex_;
+  std::mutex mutex_;
   size_t number_of_changes_ = 0;
 
  private:

@@ -13,6 +13,8 @@
 
 #include "../../Player.h"
 #include "../../TCPSocketHelper.h"
+#include "UDPToPhysicsQueue.h"
+#include "PhysicsToMapQueue.h"
 
 
 namespace Server {
@@ -31,18 +33,21 @@ class ServerMap {
 
   TCPSocketHelper::ConstBuffer GetCurrentInfo();
 
-  void SetPlayerLocation(unsigned player_id, Location new_location);
-
   [[nodiscard]] Location GetPlayerLocation(unsigned player_id);
 
   virtual ~ServerMap() = default;
 
+  TCPSocketHelper::ConstBuffer SynchronizeAndPrepareSendString();
+
+ public:
+  UDPToPhysicsQueue udp_to_physics_queue_;
+  PhysicsToMapQueue physics_to_map_queue_;
+
  private:
   std::vector<Player *> players_;
-  std::shared_mutex mutex_;
+  std::shared_mutex mutex_players_;
   sf::Image background_;
   unsigned number_of_players_ = 0;
-  // + 2 queue for Agents
 
 };
 
