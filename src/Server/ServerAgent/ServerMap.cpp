@@ -37,16 +37,16 @@ class AddPlayerException : public std::exception {
 };
 
 unsigned ServerMap::AddPlayer() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
   if (number_of_players_ == players_.size()) {
-    players_.push_back(new Player("player", Location(100, 100)));
+    players_.push_back(std::make_unique<Player>("player", Location(100, 100)));
     ++number_of_players_;
     return number_of_players_ - 1;
   } else {
     ++number_of_players_;
     for (size_t i = 0; i < players_.size(); ++i) {
       if (players_[i] == nullptr) {
-        players_[i] = new Player("player", Location(100, 100));
+        players_[i] = std::make_unique<Player>("player", Location(100, 100));
         return i;
       }
     }
@@ -56,9 +56,8 @@ unsigned ServerMap::AddPlayer() {
 
 void ServerMap::DeletePlayer(unsigned int player_id) {
   // TODO: udp notification
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
   if (players_[player_id] != nullptr) {
-    delete players_[player_id];
     players_[player_id] = nullptr;
   }
   while (!players_.empty() && players_.back() == nullptr) {
@@ -68,7 +67,7 @@ void ServerMap::DeletePlayer(unsigned int player_id) {
 }
 
 TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
 
   if (number_of_players_ == 0) {
     return TCPSocketHelper::ConstBuffer(nullptr, 0);
@@ -93,7 +92,7 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
 }
 
 Location ServerMap::GetPlayerLocation(unsigned player_id) {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
   if (player_id < players_.size() && players_[player_id] != nullptr) {
     return players_[player_id]->GetLocation();
   } else {
@@ -102,7 +101,8 @@ Location ServerMap::GetPlayerLocation(unsigned player_id) {
 }
 
 TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
+  was_synchronized_ = true;
   auto queue = physics_to_map_queue_.GetQueue();
 
   size_t length_to_send = (sizeof(unsigned) + Player::LengthToSend()) * queue.size();
@@ -120,6 +120,21 @@ TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
   }
 
   return TCPSocketHelper::ConstBuffer(to_send, length_to_send);
+}
+
+size_t ServerMap::NumberOfPlayers() {
+  std::lock_guard lock(mutex_players_);
+  return players_.size();
+}
+
+bool ServerMap::WasSynchronized() {
+  std::lock_guard lock(mutex_players_);
+  if (was_synchronized_) {
+    was_synchronized_ = false;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace Server

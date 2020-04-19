@@ -75,7 +75,7 @@ void UDPSocketAgent::ReceiveFromServer() {
       char *current_position_in_buffer = buffer;
 
       while (was_received - (current_position_in_buffer - buffer) >= sizeof(player_id) + Player::LengthToSend()) {
-        player_id = *(unsigned *) buffer;
+        player_id = *(unsigned *) current_position_in_buffer;
         current_position_in_buffer += sizeof(player_id);
 
         main_map_.UpdatePlayer(player_id, current_position_in_buffer);

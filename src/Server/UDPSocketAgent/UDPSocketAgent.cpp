@@ -29,7 +29,7 @@ void UDPSocketAgent::Initialize(size_t port, int event_fd) {
       .sin_port = htons(port),
   };
 
-  if (inet_aton("127.0.0.1", &addr.sin_addr) != 1) {
+  if (inet_aton("0.0.0.0", &addr.sin_addr) != 1) {
     throw TCPSocketHelper::InetAtonException();
   }
 
@@ -105,6 +105,7 @@ void UDPSocketAgent::WriteLoop(int event_fd) {
       read(event_fd, &event_value, sizeof(event_value));
     }
     auto to_send = main_map_.SynchronizeAndPrepareSendString();
+
     for (auto & client_address : client_addresses_) {
       if (!client_address.IsEmpty()) {
         sendto(socket_,

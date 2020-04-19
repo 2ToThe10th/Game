@@ -29,7 +29,7 @@ void TCPSocketAgent::Initialize(size_t port) {
       .sin_port = htons(port),
   };
 
-  if (inet_aton("127.0.0.1", &addr.sin_addr) != 1) {
+  if (inet_aton("0.0.0.0", &addr.sin_addr) != 1) {
     throw TCPSocketHelper::InetAtonException();
   }
 

@@ -25,6 +25,8 @@ void GraphicAgent::Initialize(sf::Image &&image, unsigned my_player_id) {
 void GraphicAgent::Draw() {
   window_.clear(sf::Color::White);
 
+  window_.draw(sf::Sprite(texture_));
+
   graphic_map_.Synchronize();
 
   float scale_x = start_window_size_.x;
@@ -35,6 +37,49 @@ void GraphicAgent::Draw() {
   sf::Sprite sprite(texture_);
   sprite.setScale(scale_x, scale_y);
   window_.draw(sprite);
+
+  std::string current_situation;
+
+  int i = 0;
+  for (auto& player: graphic_map_.main_map_.players_) {
+    current_situation += "index = ";
+    current_situation += std::to_string(i);
+    if (player == nullptr) {
+      current_situation += "   nullptr\n";
+    } else {
+      current_situation += " Location = ";
+      current_situation += std::to_string(player->GetLocation().GetX());
+      current_situation += ", ";
+      current_situation += std::to_string(player->GetLocation().GetY());
+      current_situation += "\n";
+    }
+  }
+
+  sf::Text text(current_situation, font_);
+  text.setFillColor(sf::Color::Black);
+
+  window_.draw(text);
+  current_situation = "";
+
+  i = 0;
+  for (auto& player: graphic_map_.main_map_.players_) {
+    current_situation += "index = ";
+    current_situation += std::to_string(i);
+    if (player == nullptr) {
+      current_situation += "   nullptr\n";
+    } else {
+      current_situation += " Location = ";
+      current_situation += std::to_string(player->GetLocation().GetX());
+      current_situation += ", ";
+      current_situation += std::to_string(player->GetLocation().GetY());
+      current_situation += "\n";
+    }
+  }
+
+  sf::Text text2(current_situation, font_);
+  text2.setFillColor(sf::Color::Black);
+  text2.setPosition(500, 0);
+  window_.draw(text);
 
   for (int i = 0; i < graphic_map_.PlayerVector().size(); ++i) {
     auto &player = graphic_map_.PlayerVector()[i];

@@ -32,7 +32,7 @@ void InputAgent::HandlerKeyRelease(sf::Event &event) {
   key_pressed_[event.key.code] = false;
 }
 
-UserAction InputAgent::GetUserAction() const {
+UserAction InputAgent::GetUserAction() {
   if (Time::Now() - last_send_info_time_ < kSendInterval) {
     return UserAction::Nothing();
   }
@@ -46,6 +46,7 @@ UserAction InputAgent::GetUserAction() const {
     user_action.SetAngle(ChooseAngle(Angle::Left, Angle::None, Angle::Right));
   }
 
+  last_send_info_time_ = Time::Now();
   return user_action;
 }
 

@@ -18,18 +18,22 @@ class PhysicalAgent {
   void Initialize(size_t number_of_thread);
 
   void Close();
+
  private:
   ServerMap& main_map_;
   std::vector<std::thread> threads;
+  std::vector<bool> is_player_move_;
+  std::mutex mutex_is_player_move_;
   bool is_work_ = true;
   static constexpr float kGoRightForOneTick = 0.5;
   static constexpr float kGoDiagonalForOneTick = kGoRightForOneTick / 1.41421356237;
   float map_size_x_ = 0;
   float map_size_y_ = 0;
-
  private:
+
   void PhysicalLoop();
   void HandleUpdate(UserUpdate user_update);
+  void OnSynchronize();
 
   [[nodiscard]] bool IsOnMap(const Location& location) const;
 };

@@ -23,13 +23,13 @@ class InputAgent {
 
   void HandleEvent(sf::Event &event);
 
-  [[nodiscard]] UserAction GetUserAction() const;
+  [[nodiscard]] UserAction GetUserAction();
 
  private:
   std::vector<bool> key_pressed_ = std::vector<bool>(sf::Keyboard::KeyCount, false);
 
   Time::Duration last_send_info_time_;
-  constexpr static auto kSendInterval = Time::Duration(10);
+  constexpr static auto kSendInterval = Time::Duration(5);
 
  private:
 

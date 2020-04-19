@@ -39,14 +39,19 @@ class ServerMap {
 
   TCPSocketHelper::ConstBuffer SynchronizeAndPrepareSendString();
 
+  size_t NumberOfPlayers();
+
+  bool WasSynchronized();
+
  public:
   UDPToPhysicsQueue udp_to_physics_queue_;
   PhysicsToMapQueue physics_to_map_queue_;
 
  private:
-  std::vector<Player *> players_;
+  std::vector<std::unique_ptr<Player>> players_;
   std::shared_mutex mutex_players_;
   sf::Image background_;
+  bool was_synchronized_ = false;
   unsigned number_of_players_ = 0;
 
 };

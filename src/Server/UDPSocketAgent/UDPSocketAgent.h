@@ -44,7 +44,7 @@ class UDPSocketAgent {
   std::vector<ClientAddr> client_addresses_;
 
   static constexpr size_t kTimeoutEpollRead = 1000; // Millisecond
-  static constexpr size_t kTimeoutWrite = 9; // Millisecond
+  static constexpr size_t kTimeoutWrite = 5; // Millisecond
   static constexpr size_t kMaxBufferSize = 1024;
 
  private:
