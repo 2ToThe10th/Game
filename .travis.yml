@@ -1,0 +1,31 @@
+dist: bionic
+sudo: required
+
+language: cpp
+
+os:
+  - linux
+
+compiler:
+  - gcc
+
+install:
+  - sudo apt-get install libsfml-dev
+
+script:
+  - mkdir cmake-build-client
+  - cd cmake-build-client
+  - cmake ../ -DCLIENT=1
+  - make
+  - cd ..
+  - mkdir cmake-build-server
+  - cd cmake-build-server
+  - cmake ../ -DSERVER=1
+  - make
+
+notifications:
+  email:
+    recipients:
+      - grib.a@phystech.edu
+    on_success: always
+    on_failure: always
