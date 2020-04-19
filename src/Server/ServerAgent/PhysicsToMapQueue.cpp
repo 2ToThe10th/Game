@@ -15,7 +15,6 @@ PhysicsToMapQueue::PhysicsToMapQueue() = default;
 
 void PhysicsToMapQueue::PushBack(const PlayerState &player_state) {
   std::lock_guard lock(mutex_);
-  std::cout << std::setprecision(10) << "[Push]" << player_state.GetNewLocation().GetX() << " " << player_state.GetNewLocation().GetY() << std::endl;
   players_state_.push(player_state);
   if(players_state_.size() > kMaxElementInQueue) {
     uint64_t message = 1;

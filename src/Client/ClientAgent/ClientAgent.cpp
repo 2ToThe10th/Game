@@ -26,10 +26,11 @@ void ClientAgent::InitGame(const std::string &host, const size_t tcp_port, const
   unsigned player_id = tcp_socket_agent_.Initialize(host, tcp_port, image);
   udp_socket_agent_.Initialize(host, udp_port, player_id);
 
-  graphic_agent_.Initialize(std::move(image));
+  graphic_agent_.Initialize(std::move(image), player_id);
 }
 
 void ClientAgent::RunGame() {
+  udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(UserAction::Nothing()));
   while (window_.isOpen()) {
     sf::Event event{};
     while (window_.pollEvent(event)) {

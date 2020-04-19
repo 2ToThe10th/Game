@@ -13,10 +13,17 @@ namespace Client::GraphicAgent {
 class GraphicMap {
  public:
   explicit GraphicMap(ClientMap &main_map);
+
+  size_t &LastSynchronize();
+
+  std::vector<std::unique_ptr<Player>> &PlayerVector();
+
+  bool Synchronize();
  private:
- public: //TODO: delete it
+ public:
   ClientMap &main_map_;
-  size_t last_syncronize;
+  std::vector<std::unique_ptr<Player>> players_;
+  size_t last_synchronize;
 };
 }
 #endif //GAME_SRC_CLIENTGRAPHICAGENT_GRAPHICMAP_H_

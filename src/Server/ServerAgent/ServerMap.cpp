@@ -81,14 +81,6 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
   int position_in_buffer = 0;
 
   for (unsigned i = 0; i < players_.size(); ++i) {
-    std::cout << i << "  ";
-    if (players_[i] == nullptr) {
-      std::cout << "nullptr";
-    } else {
-      std::cout << players_[i]->GetLocation().GetX() << " "
-                << players_[i]->GetLocation().GetY();
-    }
-    std::cout << std::endl;
     if (players_[i] != nullptr) {
       memcpy(buffer + position_in_buffer, &i, sizeof(i));
       position_in_buffer += sizeof(i);
@@ -118,7 +110,6 @@ TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
   char* current_position_in_to_send = to_send;
   while (!queue.empty()) {
     auto player_state = queue.front();
-    std::cout << "[UDP]" << std::setprecision(10) << player_state.GetPlayerId() << "  " << player_state.GetNewLocation().GetX() << " " << player_state.GetNewLocation().GetY() << std::endl;
     unsigned player_id = player_state.GetPlayerId();
     queue.pop();
     players_[player_id]->SetLocation(player_state.GetNewLocation());

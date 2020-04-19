@@ -36,5 +36,12 @@ void Player::UpdateFromFromString(char *buffer) {
   memcpy(&player_y, buffer, sizeof(player_y));
   buffer += sizeof(player_y);
   location_.SetY(player_y);
-  std::cout << location_.GetX() << " " << location_.GetY() << std::endl;
 }
+
+void Player::UpdateFromPlayer(Player &player) {
+  location_ = player.location_;
+  if (name_ != player.name_) {
+    name_ = player.name_;
+  }
+}
+

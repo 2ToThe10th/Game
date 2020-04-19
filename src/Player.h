@@ -28,6 +28,8 @@ class Player {
 
   void UpdateFromFromString(char *buffer);
 
+  void UpdateFromPlayer(Player& player);
+
  private:
   Location location_;
   std::string name_;
