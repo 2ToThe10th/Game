@@ -25,7 +25,7 @@ class PhysicalAgent {
   std::vector<bool> is_player_move_;
   std::mutex mutex_is_player_move_;
   bool is_work_ = true;
-  static constexpr float kGoRightForOneTick = 0.5;
+  static constexpr float kGoRightForOneTick = 0.2;
   static constexpr float kGoDiagonalForOneTick = kGoRightForOneTick / 1.41421356237;
   float map_size_x_ = 0;
   float map_size_y_ = 0;

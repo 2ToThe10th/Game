@@ -31,7 +31,6 @@ class ClientMap {
   virtual ~ClientMap() = default;
 
  private:
- public: //TODO: delete
   std::vector<std::unique_ptr<Player>> players_;
   std::mutex mutex_;
   size_t number_of_changes_ = 0;

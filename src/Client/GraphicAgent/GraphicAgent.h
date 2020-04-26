@@ -24,14 +24,29 @@ class GraphicAgent {
   void Draw();
 
  private:
-  void DrawPlayer(unsigned int player_id, float scale_x, float scale_y, bool is_my_player = false);
+  void DrawPlayer(unsigned int player_id, bool is_my_player = false);
+  void DrawGrid();
+  void DrawBackGround();
+
+  void UpdateScale();
+  void UpdateStartWindowLocation();
+
+  unsigned GetXLeftToDraw();
+  unsigned GetYLeftToDraw();
+
+  inline sf::Vector2f ScaledPosition(sf::Vector2f position) const;
+  inline sf::Vector2f ScaledPosition(float position_x, float position_y) const;
 
  private:
   static constexpr float kPlayerRadius = 5;
-  static constexpr float kMyPlayerOutlineThickness = 3;
+  static constexpr float kMyPlayerOutlineThickness = 2;
+  static const sf::Color kMyPlayerOutlineColor;
 
   sf::Vector2u start_window_size_;
+  float scale_x_ = 1;
+  float scale_y_ = 1;
   unsigned my_player_id_;
+  Location start_window_location_;
   GraphicMap graphic_map_;
   sf::RenderWindow &window_;
   sf::Texture texture_;

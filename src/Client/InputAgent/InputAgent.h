@@ -29,7 +29,7 @@ class InputAgent {
   std::vector<bool> key_pressed_ = std::vector<bool>(sf::Keyboard::KeyCount, false);
 
   Time::Duration last_send_info_time_;
-  constexpr static auto kSendInterval = Time::Duration(5);
+  constexpr static auto kSendInterval = Time::Duration(2);
 
  private:
 
