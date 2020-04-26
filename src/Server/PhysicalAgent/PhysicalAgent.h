@@ -27,6 +27,8 @@ class PhysicalAgent {
   bool is_work_ = true;
   static constexpr float kGoRightForOneTick = 0.2;
   static constexpr float kGoDiagonalForOneTick = kGoRightForOneTick / 1.41421356237;
+  static constexpr float start_position_x_ = 100;
+  static constexpr float start_position_y_ = 100;
   float map_size_x_ = 0;
   float map_size_y_ = 0;
  private:

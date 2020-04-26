@@ -116,6 +116,7 @@ void TCPSocketAgent::Close() {
 void TCPSocketAgent::WriteLoop() {
   while (is_work_) {
     auto buffer = main_map_.GetCurrentInfo();
+//    std::cout << "[WriteLoop] TCP Send" << std::endl;
     unsigned player_id = 0;
     for (auto &socket: client_sockets_) {
       if (socket > -1) {
@@ -124,7 +125,7 @@ void TCPSocketAgent::WriteLoop() {
         } catch (std::system_error &system_error) {
           close(socket);
           socket = -1;
-          main_map_.DeletePlayer(player_id);
+          main_map_.DeletePlayer(player_id, false);
         }
       }
       ++player_id;

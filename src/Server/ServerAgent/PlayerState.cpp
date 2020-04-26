@@ -6,9 +6,8 @@
 
 
 namespace Server {
-PlayerState::PlayerState(unsigned player_id, Location new_location)
+PlayerState::PlayerState(unsigned player_id, const Location &new_location)
     : player_id_(player_id), new_location_(new_location) {
-
 }
 
 unsigned PlayerState::GetPlayerId() const {
@@ -17,6 +16,19 @@ unsigned PlayerState::GetPlayerId() const {
 
 Location PlayerState::GetNewLocation() const {
   return new_location_;
+}
+
+PlayerState::PlayerState(unsigned int player_id, Command command)
+    : player_id_(player_id), command_(command) {
+
+}
+
+bool PlayerState::IsCommand() const {
+  return command_ != Command::Nothing;
+}
+
+Command PlayerState::GetCommand() const {
+  return command_;
 }
 
 }

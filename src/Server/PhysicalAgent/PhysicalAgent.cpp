@@ -40,7 +40,13 @@ void PhysicalAgent::PhysicalLoop() {
   }
 }
 
-void PhysicalAgent::HandleUpdate(UserUpdate user_update) {
+void PhysicalAgent::HandleUpdate(UserUpdate user_update) { //TODO: refactor
+
+  if (user_update.GetUserAction().IsCommandMessage()) {
+    main_map_.physics_to_map_queue_.PushBack(PlayerState(user_update.GetPlayerId(),
+                                                         user_update.GetUserAction().GetCommand()));
+    return;
+  }
 
   struct Delta {
     float x;

@@ -29,7 +29,7 @@ class ServerMap {
 
   unsigned AddPlayer(); // get new player id
 
-  void DeletePlayer(unsigned int player_id);
+  void DeletePlayer(unsigned int player_id, bool is_already_lock);
 
   TCPSocketHelper::ConstBuffer GetCurrentInfo();
 
@@ -42,6 +42,9 @@ class ServerMap {
   size_t NumberOfPlayers();
 
   bool WasSynchronized();
+
+ private:
+  void HandleDeletedPlayer(unsigned player_id, char* current_position_in_buffer);
 
  public:
   UDPToPhysicsQueue udp_to_physics_queue_;

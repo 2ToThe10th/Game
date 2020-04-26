@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include "Angle.h"
+#include "Command.h"
 
 
 class UserAction {
@@ -14,14 +15,22 @@ class UserAction {
   UserAction();
 
   [[nodiscard]] Angle GetAngle() const;
+  [[nodiscard]] Command GetCommand() const;
 
   void SetAngle(Angle angle);
 
   [[nodiscard]] bool HasSomethingToSend() const;
+  [[nodiscard]] bool IsCommandMessage() const;
+
+
 
   static UserAction Nothing();
 
+  static UserAction UserCommand(Command command);
+
  private:
+  bool is_command_message_ = false;
+  Command command_;
   Angle angle_;
 };
 

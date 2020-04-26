@@ -11,7 +11,7 @@
 
 namespace Marshaling {
 
-std::string FromInputToUDPMessage(UserAction user_input);
+std::string FromInputToUDPMessage(const UserAction& user_action);
 
 UserAction FromUDPMessageToUserAction(const char *buffer, size_t buffer_size);
 

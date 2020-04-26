@@ -21,12 +21,12 @@ class Player {
   void SetLocation(const Location &location);
 
   constexpr static size_t LengthToSend() { // return Length that will be writen by ToSend()
-    return 2 * sizeof(float);
+    return sizeof(char) + 2 * sizeof(float);
   }
 
   void ToSend(char *buffer);
 
-  void UpdateFromFromString(char *buffer);
+  void UpdateFromString(char *buffer);
 
   void UpdateFromPlayer(Player& player);
 

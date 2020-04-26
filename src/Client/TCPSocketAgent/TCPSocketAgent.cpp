@@ -79,7 +79,7 @@ void TCPSocketAgent::RunTCPRead() {
 
   epoll.Add(socket_);
 
-  while (is_work_) {
+  while (is_work_) { // TODO: передавать hash карты и отправлять ключевой кадр только если hash не совпадает
     if (epoll.Wait(kTimeoutMillisecond)) {
       auto buffer = GetCurrentSituation();
       main_map_.UpdateByConstBuffer(buffer);
