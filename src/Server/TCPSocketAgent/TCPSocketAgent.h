@@ -9,6 +9,7 @@
 
 #include "../ServerAgent/ServerMap.h"
 #include "../../Duration.h"
+#include "../../EpollOneReturn.h"
 
 
 namespace Server::TCPSocketAgent {
@@ -25,7 +26,7 @@ class TCPSocketAgent {
   Server::ServerMap &main_map_;
   std::thread tcp_accept_thread_;
   std::thread tcp_write_thread_;
-  std::vector<int> client_sockets_;
+  EpollOneReturn client_epoll_;
   bool is_work_ = true;
   int accept_socket_ = -1;
 
@@ -37,7 +38,7 @@ class TCPSocketAgent {
   void SendImage(int socket);
   void SetAndSendPlayerId(int client_socket);
 
-  void WriteLoop();
+  void CheckHashAndWriteLoop();
 };
 
 }

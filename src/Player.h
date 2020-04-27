@@ -6,6 +6,8 @@
 #define GAME_SRC_PLAYER_H_
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include "Location.h"
 
@@ -30,10 +32,17 @@ class Player {
 
   void UpdateFromPlayer(Player& player);
 
+  static uint64_t GetHashOfVector(std::vector<std::unique_ptr<Player>>& players);
+
+ private:
+  uint64_t GetPlayerHash();
+
  private:
   Location location_;
   std::string name_;
- private:
+
+  static constexpr uint64_t kMultiplierInVector = 5;
+  static constexpr uint64_t kMultiplierInPlayer = 11;
 };
 
 #endif //GAME_SRC_PLAYER_H_

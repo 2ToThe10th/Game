@@ -49,3 +49,20 @@ void Player::UpdateFromPlayer(Player &player) {
   }
 }
 
+uint64_t Player::GetHashOfVector(std::vector<std::unique_ptr<Player>> &players) {
+  uint64_t hash = 0;
+  for (auto& player: players) {
+    hash *= kMultiplierInVector;
+    if (player != nullptr) {
+      hash += player->GetPlayerHash();
+    }
+  }
+  return hash;
+}
+
+uint64_t Player::GetPlayerHash() {
+  uint64_t hash = 0;
+  hash += location_.GetHash(kMultiplierInPlayer);
+  return hash;
+}
+

@@ -27,3 +27,4 @@ void Location::SetX(float x) {
 void Location::SetY(float y) {
   y_ = y;
 }
+

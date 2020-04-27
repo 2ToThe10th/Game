@@ -34,7 +34,7 @@ class TCPSocketAgent {
   void Connect(const std::string &host, size_t port);
   void RunTCPRead();
   void ReceiveImage(sf::Image &image);
-  [[nodiscard]] TCPSocketHelper::ConstBuffer GetCurrentSituation();
+  [[nodiscard]] TCPSocketHelper::ConstBuffer GetCurrentSituation() const;
 };
 
 }

@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <cassert>
 
+
 namespace Server {
 
 class ImageLoadException : public std::exception {
@@ -111,8 +112,8 @@ TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
   auto queue = physics_to_map_queue_.GetQueue();
 
   size_t length_to_send = (sizeof(unsigned) + Player::LengthToSend()) * queue.size();
-  char* to_send = new char[length_to_send];
-  char* current_position_in_to_send = to_send;
+  char *to_send = new char[length_to_send];
+  char *current_position_in_to_send = to_send;
   while (!queue.empty()) {
     auto player_state = queue.front();
     unsigned player_id = player_state.GetPlayerId();
@@ -161,6 +162,10 @@ void ServerMap::HandleDeletedPlayer(unsigned int player_id, char *current_positi
   auto command = static_cast<unsigned>(Command::Disconnect);
   memcpy(current_position_in_buffer, &command, sizeof(command));
   current_position_in_buffer += sizeof(command);
+}
+
+uint64_t ServerMap::GetHash() {
+  return Player::GetHashOfVector(players_);
 }
 
 }  // namespace Server

@@ -43,6 +43,8 @@ class ServerMap {
 
   bool WasSynchronized();
 
+  uint64_t GetHash();
+
  private:
   void HandleDeletedPlayer(unsigned player_id, char* current_position_in_buffer);
 

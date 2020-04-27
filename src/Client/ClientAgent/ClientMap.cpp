@@ -87,7 +87,13 @@ void ClientMap::DeleteOnePlayer(unsigned int player_id) {
   if (player_id >= players_.size()) {
     return;
   }
+  ++number_of_changes_;
   players_[player_id] = nullptr;
+}
+
+uint64_t ClientMap::GetHash() {
+  std::lock_guard lock(mutex_);
+  return Player::GetHashOfVector(players_);
 }
 
 }  // namespace Client

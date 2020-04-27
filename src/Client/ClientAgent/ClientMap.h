@@ -29,6 +29,8 @@ class ClientMap {
   template<typename Map>
   bool Synchronize(Map &map);
 
+  uint64_t GetHash();
+
   virtual ~ClientMap() = default;
 
  private:
