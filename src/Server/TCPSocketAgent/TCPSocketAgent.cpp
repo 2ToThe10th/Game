@@ -24,12 +24,9 @@ void TCPSocketAgent::Initialize(size_t port) {
     throw std::system_error(errno, std::generic_category());
   }
 
-  struct sockaddr_in addr = {
-      .sin_family = AF_INET,
-      .sin_port = htons(port),
-  };
+  struct sockaddr_in addr = {.sin_family = AF_INET, .sin_port = htons(port),};
 
-  if (inet_aton("127.0.0.1", &addr.sin_addr) != 1) {
+  if (inet_aton("0.0.0.0", &addr.sin_addr) != 1) {
     throw TCPSocketHelper::InetAtonException();
   }
 
@@ -46,7 +43,7 @@ void TCPSocketAgent::Initialize(size_t port) {
   });
 
   tcp_write_thread_ = std::thread([this] {
-    this->WriteLoop();
+    this->CheckHashAndWriteLoop();
   });
 }
 
@@ -91,15 +88,11 @@ void TCPSocketAgent::SendImage(int socket) {
 void TCPSocketAgent::SetAndSendPlayerId(int client_socket) {
   unsigned client_id = main_map_.AddPlayer();
 
-  if (client_id >= client_sockets_.size()) {
-    client_sockets_.resize(client_id + 1, -1);
-  }
-
   TCPSocketHelper::WriteAll(client_socket,
                             reinterpret_cast<const char *> (&client_id),
                             sizeof(client_id));
 
-  client_sockets_[client_id] = client_socket;
+  client_epoll_.Add(client_socket);
 }
 
 void TCPSocketAgent::Close() {
@@ -113,23 +106,32 @@ void TCPSocketAgent::Close() {
   close(accept_socket_);
 }
 
-void TCPSocketAgent::WriteLoop() {
+void TCPSocketAgent::CheckHashAndWriteLoop() {
+
   while (is_work_) {
-    auto buffer = main_map_.GetCurrentInfo();
-    unsigned player_id = 0;
-    for (auto &socket: client_sockets_) {
-      if (socket > -1) {
+    int client_socket;
+    if (client_epoll_.WaitWithFd(kEpollTimeoutMillisecond, client_socket)) {
+      uint64_t client_hash;
+      try {
+        TCPSocketHelper::ReadAll(client_socket,
+                                 reinterpret_cast<char *>(&client_hash),
+                                 sizeof(client_hash));
+      } catch (std::system_error &system_error) {
+        close(client_socket);
+      }
+      auto current_hash = main_map_.GetHash();
+//      std::cout << "[CheckHashAndWriteLoop] Get hash: " << client_hash << "   Current hash: "
+//                << current_hash << std::endl;
+      if (client_hash != current_hash) {
+//        std::cout << "Send current situation" << std::endl;
+        auto buffer = main_map_.GetCurrentInfo();
         try {
-          buffer.WriteTo(socket);
+          buffer.WriteTo(client_socket);
         } catch (std::system_error &system_error) {
-          close(socket);
-          socket = -1;
-          main_map_.DeletePlayer(player_id);
+          close(client_socket);
         }
       }
-      ++player_id;
     }
-    std::this_thread::sleep_for(kWriteAllPeriod);
   }
 }
 

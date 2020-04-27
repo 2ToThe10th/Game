@@ -28,7 +28,7 @@ void ReadAll(int socket_fd, char *buffer, size_t buffer_size) {
   size_t already_read = 0;
   while (buffer_size > 0) {
     int was_read = read(socket_fd, buffer + already_read, buffer_size);
-    if (was_read < 0) {
+    if (was_read <= 0) {
       throw std::system_error(errno, std::generic_category());
     }
     already_read += was_read;
@@ -63,17 +63,21 @@ size_t ConstBuffer::GetSize() {
   return size_;
 }
 
-void ConstBuffer::WriteTo(int socket_fd) const {
+void ConstBuffer::WriteTo(int socket_fd) const { //TODO: Send by one package
   WriteAll(socket_fd, reinterpret_cast<const char *>(&size_), sizeof(size_));
   WriteAll(socket_fd, buffer_, size_);
 }
 
 ConstBuffer ConstBuffer::ReadFrom(int socket_fd) {
-  size_t size;
-  ReadAll(socket_fd, reinterpret_cast<char *>(&size), sizeof(size));
-  char *buffer = new char[size];
-  ReadAll(socket_fd, buffer, size);
-  return ConstBuffer(buffer, size);
+  try {
+    size_t size;
+    ReadAll(socket_fd, reinterpret_cast<char *>(&size), sizeof(size));
+    char *buffer = new char[size];
+    ReadAll(socket_fd, buffer, size);
+    return ConstBuffer(buffer, size);
+  } catch (...) { // ignore
+    return ConstBuffer(nullptr, 0);
+  }
 }
 
 ConstBuffer::~ConstBuffer() {

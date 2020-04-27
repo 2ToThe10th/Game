@@ -5,6 +5,7 @@
 //
 
 #include "ClientMap.h"
+#include "../../Command.h"
 
 #include <iostream>
 #include <mutex>
@@ -16,7 +17,8 @@ namespace Client {
 void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) {
   std::lock_guard lock(mutex_);
   unsigned
-      player_in_buffer_number = const_buffer.GetSize() / (sizeof(unsigned) + 2 * sizeof(float));
+      player_in_buffer_number = const_buffer.GetSize() / (sizeof(unsigned) + Player::LengthToSend());
+//  std::cout << "[UpdateByConstBuffer] " << player_in_buffer_number << std::endl;
 
   char *buffer = const_buffer.GetBuffer();
 
@@ -37,7 +39,7 @@ void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) 
     if (players_[player_index] == nullptr) {
       players_[player_index] = std::make_unique<Player>();
     }
-    players_[player_index]->UpdateFromFromString(buffer);
+    players_[player_index]->UpdateFromString(buffer + sizeof(char));
     buffer += Player::LengthToSend();
 
     after_last_index = player_index + 1;
@@ -50,6 +52,7 @@ void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) 
 }
 
 void ClientMap::DeletePlayersFromTo(unsigned int from, unsigned int to) {
+//  std::cout << "[DeletePlayersFromTo]" << std::endl;
   for (unsigned i = from; i < to; ++i) {
     players_[i] = nullptr;
   }
@@ -57,14 +60,40 @@ void ClientMap::DeletePlayersFromTo(unsigned int from, unsigned int to) {
 
 void ClientMap::UpdatePlayer(unsigned int player_id, char *buffer) {
   std::lock_guard lock(mutex_);
-  if (players_.size() <= player_id) {
-    players_.resize(player_id + 1);
+  char is_command = *buffer;
+  buffer += sizeof(is_command);
+  if (is_command) {
+    unsigned unsigned_command;
+    memcpy(&unsigned_command, buffer, sizeof(unsigned_command));
+    buffer += sizeof(unsigned_command);
+    auto command = static_cast<Command>(unsigned_command);
+    if (command == Command::Disconnect) {
+      DeleteOnePlayer(player_id);
+    }
+  } else {
+    if (players_.size() <= player_id) {
+      players_.resize(player_id + 1);
+    }
+    if (players_[player_id] == nullptr) {
+      players_[player_id] = std::make_unique<Player>();
+    }
+    players_[player_id]->UpdateFromString(buffer);
+    ++number_of_changes_;
   }
-  if (players_[player_id] == nullptr) {
-    players_[player_id] = std::make_unique<Player>();
+}
+
+void ClientMap::DeleteOnePlayer(unsigned int player_id) {
+//  std::cout << "[DeleteOnePlayer]" << std::endl;
+  if (player_id >= players_.size()) {
+    return;
   }
-  players_[player_id]->UpdateFromFromString(buffer);
   ++number_of_changes_;
+  players_[player_id] = nullptr;
+}
+
+uint64_t ClientMap::GetHash() {
+  std::lock_guard lock(mutex_);
+  return Player::GetHashOfVector(players_);
 }
 
 }  // namespace Client

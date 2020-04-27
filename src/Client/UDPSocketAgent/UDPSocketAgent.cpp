@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
+
 #include "UDPSocketAgent.h"
 #include "../../UDPSocketHelper.h"
 #include "../../EpollOneReturn.h"
@@ -39,6 +40,7 @@ void UDPSocketAgent::Initialize(const std::string &host, const size_t port, unsi
 
 void UDPSocketAgent::WriteToServer(const std::string &message) {
   size_t real_size = message.size() + sizeof(player_id_);
+//  std::cout << "[Real size]" << real_size << std::endl;
   char real_message[real_size];
   memcpy(real_message, &player_id_, sizeof(player_id_));
   memcpy(real_message + sizeof(player_id_), message.c_str(), message.size());
@@ -75,7 +77,7 @@ void UDPSocketAgent::ReceiveFromServer() {
       char *current_position_in_buffer = buffer;
 
       while (was_received - (current_position_in_buffer - buffer) >= sizeof(player_id) + Player::LengthToSend()) {
-        player_id = *(unsigned *) buffer;
+        player_id = *(unsigned *) current_position_in_buffer;
         current_position_in_buffer += sizeof(player_id);
 
         main_map_.UpdatePlayer(player_id, current_position_in_buffer);

@@ -12,6 +12,7 @@ class EpollOneReturn {
   void Add(int socket);
 
   bool Wait(int timeout_millisecond);
+  bool WaitWithFd(int timeout_millisecond, int &socket_fd);
 
   ~EpollOneReturn();
  private:

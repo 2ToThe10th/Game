@@ -42,10 +42,12 @@ void ClientAgent::RunGame() {
     }
     UserAction user_action = input_agent_.GetUserAction();
     if (user_action.HasSomethingToSend()) {
-      udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(user_action)); // TODO: передавать hash карты и отправлять ключевой кадр только если hash не совпадает
+      udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(user_action));
     }
     graphic_agent_.Draw();
   }
+//  std::cout << "[ClientAgent] Disconnect" << std::endl;
+  udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(UserAction::UserCommand(Command::Disconnect)));
 }
 
 void ClientAgent::Close() {

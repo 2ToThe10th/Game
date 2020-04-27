@@ -24,12 +24,9 @@ void UDPSocketAgent::Initialize(size_t port, int event_fd) {
     throw std::system_error(errno, std::generic_category());
   }
 
-  struct sockaddr_in addr = {
-      .sin_family = AF_INET,
-      .sin_port = htons(port),
-  };
+  struct sockaddr_in addr = {.sin_family = AF_INET, .sin_port = htons(port),};
 
-  if (inet_aton("127.0.0.1", &addr.sin_addr) != 1) {
+  if (inet_aton("0.0.0.0", &addr.sin_addr) != 1) {
     throw TCPSocketHelper::InetAtonException();
   }
 
@@ -58,9 +55,12 @@ void UDPSocketAgent::ReadLoop() {
     if (epoll.Wait(kTimeoutEpollRead)) {
       struct sockaddr_in addr{};
       socklen_t addr_size = sizeof(addr);
-      ssize_t was_received =
-          recvfrom(socket_, buffer, kMaxBufferSize + sizeof(unsigned), 0,
-                   reinterpret_cast<sockaddr *>(&addr), &addr_size);
+      ssize_t was_received = recvfrom(socket_,
+                                      buffer,
+                                      kMaxBufferSize + sizeof(unsigned),
+                                      0,
+                                      reinterpret_cast<sockaddr *>(&addr),
+                                      &addr_size);
       unsigned player_id = *(unsigned *) buffer;
 
       if (was_received < sizeof(player_id)) {
@@ -75,10 +75,10 @@ void UDPSocketAgent::ReadLoop() {
         client_addresses_[player_id].SetFrom(&addr, addr_size);
       }
 
-      main_map_.udp_to_physics_queue_.PushBack(
-          UserUpdate(player_id, Marshaling::FromUDPMessageToUserAction(
-              buffer + sizeof(player_id),
-              was_received - sizeof(player_id))));
+      main_map_.udp_to_physics_queue_.PushBack(UserUpdate(player_id,
+                                                          Marshaling::FromUDPMessageToUserAction(
+                                                              buffer + sizeof(player_id),
+                                                              was_received - sizeof(player_id))));
     }
   }
 }
@@ -105,14 +105,16 @@ void UDPSocketAgent::WriteLoop(int event_fd) {
       read(event_fd, &event_value, sizeof(event_value));
     }
     auto to_send = main_map_.SynchronizeAndPrepareSendString();
-    for (auto & client_address : client_addresses_) {
-      if (!client_address.IsEmpty()) {
-        sendto(socket_,
-               to_send.GetBuffer(),
-               to_send.GetSize(),
-               0,
-               reinterpret_cast<const sockaddr *>(&client_address.addr_),
-               client_address.size_);
+    if (to_send.GetSize() > 0) {
+      for (auto &client_address : client_addresses_) {
+        if (!client_address.IsEmpty()) {
+          sendto(socket_,
+                 to_send.GetBuffer(),
+                 to_send.GetSize(),
+                 0,
+                 reinterpret_cast<const sockaddr *>(&client_address.addr_),
+                 client_address.size_);
+        }
       }
     }
   }

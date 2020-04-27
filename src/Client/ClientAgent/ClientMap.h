@@ -10,6 +10,7 @@
 #include <SFML/Graphics/Image.hpp>
 #include <shared_mutex>
 #include <vector>
+#include <iostream>
 
 #include "../../Player.h"
 #include "../../TCPSocketHelper.h"
@@ -28,16 +29,18 @@ class ClientMap {
   template<typename Map>
   bool Synchronize(Map &map);
 
+  uint64_t GetHash();
+
   virtual ~ClientMap() = default;
 
  private:
- public: //TODO: delete
   std::vector<std::unique_ptr<Player>> players_;
   std::mutex mutex_;
   size_t number_of_changes_ = 0;
 
  private:
   void DeletePlayersFromTo(unsigned int from, unsigned int to);
+  void DeleteOnePlayer(unsigned int player_id);
 };
 
 template<typename Map>
@@ -50,7 +53,9 @@ bool ClientMap::Synchronize(Map &map) {
 
   map.PlayerVector().resize(players_.size());
 
+//  std::cout << "[Synchronize] " << players_.size() << std::endl;
   for (int index = 0; index < players_.size(); ++index) {
+//    std::cout << "[Synchronize] " << index << " " << (map.PlayerVector()[index] == nullptr) << std::endl;
     if (players_[index] == nullptr) {
       if (map.PlayerVector()[index] != nullptr) {
         map.PlayerVector()[index] = nullptr;

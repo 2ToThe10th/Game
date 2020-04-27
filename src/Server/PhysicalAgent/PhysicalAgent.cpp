@@ -40,7 +40,13 @@ void PhysicalAgent::PhysicalLoop() {
   }
 }
 
-void PhysicalAgent::HandleUpdate(UserUpdate user_update) {
+void PhysicalAgent::HandleUpdate(UserUpdate user_update) { //TODO: refactor
+
+  if (user_update.GetUserAction().IsCommandMessage()) {
+    main_map_.physics_to_map_queue_.PushBack(PlayerState(user_update.GetPlayerId(),
+                                                         user_update.GetUserAction().GetCommand()));
+    return;
+  }
 
   struct Delta {
     float x;
@@ -52,6 +58,23 @@ void PhysicalAgent::HandleUpdate(UserUpdate user_update) {
        {kGoRightForOneTick, 0}, {kGoDiagonalForOneTick, kGoDiagonalForOneTick},
        {0, kGoRightForOneTick}, {-kGoDiagonalForOneTick, kGoDiagonalForOneTick},
        {-kGoRightForOneTick, 0}, {-kGoDiagonalForOneTick, -kGoDiagonalForOneTick}, {0, 0}};
+
+  std::lock_guard lock(mutex_is_player_move_);
+
+  if (main_map_.WasSynchronized()) {
+    OnSynchronize();
+  }
+
+  if (is_player_move_.size() != main_map_.NumberOfPlayers()) {
+    is_player_move_.resize(main_map_.NumberOfPlayers(), false);
+  }
+
+  if (is_player_move_[user_update.GetPlayerId()]) {
+    return;
+  }
+  is_player_move_[user_update.GetPlayerId()] = true;
+
+  mutex_is_player_move_.unlock();
 
   auto current_location = main_map_.GetPlayerLocation(user_update.GetPlayerId());
 
@@ -69,6 +92,12 @@ void PhysicalAgent::HandleUpdate(UserUpdate user_update) {
 bool PhysicalAgent::IsOnMap(const Location &location) const {
   return !(location.GetX() < 0 || location.GetY() < 0 || location.GetX() > map_size_x_
       || location.GetY() > map_size_y_);
+}
+
+void PhysicalAgent::OnSynchronize() {
+  for (auto i : is_player_move_) {
+    i = false;
+  }
 }
 
 }

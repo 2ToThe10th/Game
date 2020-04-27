@@ -10,6 +10,7 @@
 #include <mutex>
 #include <cstring>
 #include <iomanip>
+#include <cassert>
 
 
 namespace Server {
@@ -37,16 +38,16 @@ class AddPlayerException : public std::exception {
 };
 
 unsigned ServerMap::AddPlayer() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
   if (number_of_players_ == players_.size()) {
-    players_.push_back(new Player("player", Location(100, 100)));
+    players_.push_back(std::make_unique<Player>("player", Location(100, 100)));
     ++number_of_players_;
     return number_of_players_ - 1;
   } else {
     ++number_of_players_;
     for (size_t i = 0; i < players_.size(); ++i) {
       if (players_[i] == nullptr) {
-        players_[i] = new Player("player", Location(100, 100));
+        players_[i] = std::make_unique<Player>("player", Location(100, 100));
         return i;
       }
     }
@@ -54,27 +55,30 @@ unsigned ServerMap::AddPlayer() {
   throw AddPlayerException();
 }
 
-void ServerMap::DeletePlayer(unsigned int player_id) {
-  // TODO: udp notification
-  std::unique_lock lock(mutex_players_);
-  if (players_[player_id] != nullptr) {
-    delete players_[player_id];
+void ServerMap::DeletePlayer(unsigned int player_id, bool is_already_lock) {
+  if (!is_already_lock) {
+    mutex_players_.lock();
+  }
+  if (player_id < players_.size() && players_[player_id] != nullptr) {
     players_[player_id] = nullptr;
+    --number_of_players_;
   }
   while (!players_.empty() && players_.back() == nullptr) {
     players_.pop_back();
   }
-  --number_of_players_;
+  if (!is_already_lock) {
+    mutex_players_.unlock();
+  }
 }
 
 TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
 
   if (number_of_players_ == 0) {
     return TCPSocketHelper::ConstBuffer(nullptr, 0);
   }
 
-  size_t buffer_size = number_of_players_ * (sizeof(unsigned) + 2 * sizeof(float));
+  size_t buffer_size = number_of_players_ * (sizeof(unsigned) + Player::LengthToSend());
 
   char *buffer = new char[buffer_size];
 
@@ -84,6 +88,7 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
     if (players_[i] != nullptr) {
       memcpy(buffer + position_in_buffer, &i, sizeof(i));
       position_in_buffer += sizeof(i);
+//      std::cout << "[TCP] " << players_[i]->GetLocation().GetX() << "   " << players_[i]->GetLocation().GetY() << std::endl;
       players_[i]->ToSend(buffer + position_in_buffer);
       position_in_buffer += Player::LengthToSend();
     }
@@ -93,7 +98,7 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
 }
 
 Location ServerMap::GetPlayerLocation(unsigned player_id) {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
   if (player_id < players_.size() && players_[player_id] != nullptr) {
     return players_[player_id]->GetLocation();
   } else {
@@ -102,24 +107,65 @@ Location ServerMap::GetPlayerLocation(unsigned player_id) {
 }
 
 TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
-  std::unique_lock lock(mutex_players_);
+  std::lock_guard lock(mutex_players_);
+  was_synchronized_ = true;
   auto queue = physics_to_map_queue_.GetQueue();
 
   size_t length_to_send = (sizeof(unsigned) + Player::LengthToSend()) * queue.size();
-  char* to_send = new char[length_to_send];
-  char* current_position_in_to_send = to_send;
+  char *to_send = new char[length_to_send];
+  char *current_position_in_to_send = to_send;
   while (!queue.empty()) {
     auto player_state = queue.front();
     unsigned player_id = player_state.GetPlayerId();
     queue.pop();
-    players_[player_id]->SetLocation(player_state.GetNewLocation());
-    memcpy(current_position_in_to_send, &player_id, sizeof(player_id));
-    current_position_in_to_send += sizeof(player_id);
-    players_[player_id]->ToSend(current_position_in_to_send);
-    current_position_in_to_send += Player::LengthToSend();
+    if (player_state.IsCommand()) {
+//      std::cout << "{SAPSS}[Command] " << static_cast<int>(player_state.GetCommand()) << std::endl;
+      if (player_state.GetCommand() == Command::Disconnect) {
+        HandleDeletedPlayer(player_id, current_position_in_to_send);
+        current_position_in_to_send += sizeof(player_id) + Player::LengthToSend();
+      }
+    } else {
+//      std::cout << "[Location]" << player_state.GetNewLocation().GetX() << "  " << player_state.GetNewLocation().GetY() << std::endl;
+      players_[player_id]->SetLocation(player_state.GetNewLocation());
+      memcpy(current_position_in_to_send, &player_id, sizeof(player_id));
+      current_position_in_to_send += sizeof(player_id);
+      players_[player_id]->ToSend(current_position_in_to_send);
+      current_position_in_to_send += Player::LengthToSend();
+    }
   }
 
   return TCPSocketHelper::ConstBuffer(to_send, length_to_send);
+}
+
+size_t ServerMap::NumberOfPlayers() {
+  std::lock_guard lock(mutex_players_);
+  return players_.size();
+}
+
+bool ServerMap::WasSynchronized() {
+  std::lock_guard lock(mutex_players_);
+  if (was_synchronized_) {
+    was_synchronized_ = false;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void ServerMap::HandleDeletedPlayer(unsigned int player_id, char *current_position_in_buffer) {
+  DeletePlayer(player_id, true);
+  memcpy(current_position_in_buffer, &player_id, sizeof(player_id));
+  current_position_in_buffer += sizeof(player_id);
+  char is_command = true;
+  memcpy(current_position_in_buffer, &is_command, sizeof(is_command));
+  current_position_in_buffer += sizeof(is_command);
+  auto command = static_cast<unsigned>(Command::Disconnect);
+  memcpy(current_position_in_buffer, &command, sizeof(command));
+  current_position_in_buffer += sizeof(command);
+}
+
+uint64_t ServerMap::GetHash() {
+  return Player::GetHashOfVector(players_);
 }
 
 }  // namespace Server

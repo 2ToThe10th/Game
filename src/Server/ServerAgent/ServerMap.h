@@ -29,7 +29,7 @@ class ServerMap {
 
   unsigned AddPlayer(); // get new player id
 
-  void DeletePlayer(unsigned int player_id);
+  void DeletePlayer(unsigned int player_id, bool is_already_lock);
 
   TCPSocketHelper::ConstBuffer GetCurrentInfo();
 
@@ -39,14 +39,24 @@ class ServerMap {
 
   TCPSocketHelper::ConstBuffer SynchronizeAndPrepareSendString();
 
+  size_t NumberOfPlayers();
+
+  bool WasSynchronized();
+
+  uint64_t GetHash();
+
+ private:
+  void HandleDeletedPlayer(unsigned player_id, char* current_position_in_buffer);
+
  public:
   UDPToPhysicsQueue udp_to_physics_queue_;
   PhysicsToMapQueue physics_to_map_queue_;
 
  private:
-  std::vector<Player *> players_;
+  std::vector<std::unique_ptr<Player>> players_;
   std::shared_mutex mutex_players_;
   sf::Image background_;
+  bool was_synchronized_ = false;
   unsigned number_of_players_ = 0;
 
 };
