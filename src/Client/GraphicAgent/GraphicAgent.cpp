@@ -25,7 +25,7 @@ void GraphicAgent::Initialize(sf::Image &&image, unsigned my_player_id) {
 }
 
 void GraphicAgent::Draw() {
-  if (!graphic_map_.Synchronize()) {
+  if (!graphic_map_.Synchronize() && !WasResized()) {
     return;
   }
 
@@ -62,7 +62,6 @@ void GraphicAgent::Draw() {
 
 void GraphicAgent::DrawPlayer(unsigned int player_id, bool is_my_player) {
   auto &player = graphic_map_.PlayerVector()[player_id];
-//  std::cout << "[DrawPlayer] " << player->GetLocation().GetX() << "  " << player->GetLocation().GetY() << std::endl;
   sf::CircleShape circle(kPlayerRadius, 1000);
   circle.setPosition(ScaledPosition(
       player->GetLocation().GetX() - kPlayerRadius - start_window_location_.GetX(),
@@ -147,6 +146,18 @@ unsigned GraphicAgent::GetXLeftToDraw() {
 
 unsigned GraphicAgent::GetYLeftToDraw() {
   return texture_.getSize().y - static_cast<unsigned>(std::lround(start_window_location_.GetY()));
+}
+
+void GraphicAgent::Resized() {
+  was_resized_ = true;
+}
+bool GraphicAgent::WasResized() {
+  if (was_resized_) {
+    was_resized_ = false;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }

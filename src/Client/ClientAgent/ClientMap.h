@@ -53,9 +53,7 @@ bool ClientMap::Synchronize(Map &map) {
 
   map.PlayerVector().resize(players_.size());
 
-//  std::cout << "[Synchronize] " << players_.size() << std::endl;
   for (int index = 0; index < players_.size(); ++index) {
-//    std::cout << "[Synchronize] " << index << " " << (map.PlayerVector()[index] == nullptr) << std::endl;
     if (players_[index] == nullptr) {
       if (map.PlayerVector()[index] != nullptr) {
         map.PlayerVector()[index] = nullptr;

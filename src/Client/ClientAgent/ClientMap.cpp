@@ -18,7 +18,6 @@ void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) 
   std::lock_guard lock(mutex_);
   unsigned
       player_in_buffer_number = const_buffer.GetSize() / (sizeof(unsigned) + Player::LengthToSend());
-//  std::cout << "[UpdateByConstBuffer] " << player_in_buffer_number << std::endl;
 
   char *buffer = const_buffer.GetBuffer();
 
@@ -52,7 +51,6 @@ void ClientMap::UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer) 
 }
 
 void ClientMap::DeletePlayersFromTo(unsigned int from, unsigned int to) {
-//  std::cout << "[DeletePlayersFromTo]" << std::endl;
   for (unsigned i = from; i < to; ++i) {
     players_[i] = nullptr;
   }
@@ -83,7 +81,6 @@ void ClientMap::UpdatePlayer(unsigned int player_id, char *buffer) {
 }
 
 void ClientMap::DeleteOnePlayer(unsigned int player_id) {
-//  std::cout << "[DeleteOnePlayer]" << std::endl;
   if (player_id >= players_.size()) {
     return;
   }

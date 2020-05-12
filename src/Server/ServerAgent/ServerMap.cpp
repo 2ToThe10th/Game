@@ -88,7 +88,6 @@ TCPSocketHelper::ConstBuffer ServerMap::GetCurrentInfo() {
     if (players_[i] != nullptr) {
       memcpy(buffer + position_in_buffer, &i, sizeof(i));
       position_in_buffer += sizeof(i);
-//      std::cout << "[TCP] " << players_[i]->GetLocation().GetX() << "   " << players_[i]->GetLocation().GetY() << std::endl;
       players_[i]->ToSend(buffer + position_in_buffer);
       position_in_buffer += Player::LengthToSend();
     }
@@ -119,13 +118,11 @@ TCPSocketHelper::ConstBuffer ServerMap::SynchronizeAndPrepareSendString() {
     unsigned player_id = player_state.GetPlayerId();
     queue.pop();
     if (player_state.IsCommand()) {
-//      std::cout << "{SAPSS}[Command] " << static_cast<int>(player_state.GetCommand()) << std::endl;
       if (player_state.GetCommand() == Command::Disconnect) {
         HandleDeletedPlayer(player_id, current_position_in_to_send);
         current_position_in_to_send += sizeof(player_id) + Player::LengthToSend();
       }
     } else {
-//      std::cout << "[Location]" << player_state.GetNewLocation().GetX() << "  " << player_state.GetNewLocation().GetY() << std::endl;
       players_[player_id]->SetLocation(player_state.GetNewLocation());
       memcpy(current_position_in_to_send, &player_id, sizeof(player_id));
       current_position_in_to_send += sizeof(player_id);

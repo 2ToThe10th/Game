@@ -79,14 +79,13 @@ void TCPSocketAgent::RunTCPRead() {
 
   epoll.Add(socket_);
 
-  while (is_work_) { // TODO: передавать hash карты и отправлять ключевой кадр только если hash не совпадает
+  while (is_work_) { // TODO: передавать hash карты и отправлять ключевой кадр только если hash не совпадает by tiles
+                     // поиск по дереву, где что-то изменилось и только их пересылать
     if (epoll.Wait(kTimeoutMillisecond)) {
-//      std::cout << "[TCPRead] Get Update" << std::endl;
       auto buffer = GetCurrentSituation();
       main_map_.UpdateByConstBuffer(buffer);
     } else {
       uint64_t hash = main_map_.GetHash();
-//      std::cout << "[TCPRead] Send hash" << hash << std::endl;
       TCPSocketHelper::WriteAll(socket_, reinterpret_cast<const char *>(&hash), sizeof(hash));
     }
   }

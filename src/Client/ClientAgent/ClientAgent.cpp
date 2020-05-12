@@ -2,23 +2,17 @@
 // Created by 2ToThe10th on 23.03.2020.
 //
 
-#include <iostream>
 #include "ClientAgent.h"
 #include "../../Marshaling.h"
-
 
 namespace Client {
 
 ClientAgent::ClientAgent(sf::RenderWindow &window)
-    : window_(window),
-      map_(),
-      graphic_agent_(map_, window_),
-      input_agent_(),
-      tcp_socket_agent_(map_),
-      udp_socket_agent_(map_) {
-}
+    : window_(window), map_(), graphic_agent_(map_, window_), input_agent_(),
+      tcp_socket_agent_(map_), udp_socket_agent_(map_) {}
 
-void ClientAgent::InitGame(const std::string &host, const size_t tcp_port, const size_t udp_port) {
+void ClientAgent::InitGame(const std::string &host, const size_t tcp_port,
+                           const size_t udp_port) {
   input_agent_.Initialize(window_);
 
   sf::Image image;
@@ -30,24 +24,28 @@ void ClientAgent::InitGame(const std::string &host, const size_t tcp_port, const
 }
 
 void ClientAgent::RunGame() {
-  udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(UserAction::Nothing()));
+  udp_socket_agent_.WriteToServer(
+      Marshaling::FromInputToUDPMessage(UserAction::Nothing()));
   while (window_.isOpen()) {
     sf::Event event{};
     while (window_.pollEvent(event)) {
       if (event.type == sf::Event::Closed) {
         window_.close();
+      } else if (event.type == sf::Event::Resized) {
+        graphic_agent_.Resized();
       } else {
         input_agent_.HandleEvent(event);
       }
     }
     UserAction user_action = input_agent_.GetUserAction();
     if (user_action.HasSomethingToSend()) {
-      udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(user_action));
+      udp_socket_agent_.WriteToServer(
+          Marshaling::FromInputToUDPMessage(user_action));
     }
     graphic_agent_.Draw();
   }
-//  std::cout << "[ClientAgent] Disconnect" << std::endl;
-  udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(UserAction::UserCommand(Command::Disconnect)));
+  udp_socket_agent_.WriteToServer(Marshaling::FromInputToUDPMessage(
+      UserAction::UserCommand(Command::Disconnect)));
 }
 
 void ClientAgent::Close() {

@@ -39,7 +39,6 @@ void Player::UpdateFromString(char *buffer) {
   memcpy(&player_y, buffer, sizeof(player_y));
   buffer += sizeof(player_y);
   location_.SetY(player_y);
-//  std::cout << "[UpdateFromString] " << player_x << "  " << player_y << std::endl;
 }
 
 void Player::UpdateFromPlayer(Player &player) {

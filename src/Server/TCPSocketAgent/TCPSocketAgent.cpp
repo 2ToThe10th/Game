@@ -120,10 +120,7 @@ void TCPSocketAgent::CheckHashAndWriteLoop() {
         close(client_socket);
       }
       auto current_hash = main_map_.GetHash();
-//      std::cout << "[CheckHashAndWriteLoop] Get hash: " << client_hash << "   Current hash: "
-//                << current_hash << std::endl;
       if (client_hash != current_hash) {
-//        std::cout << "Send current situation" << std::endl;
         auto buffer = main_map_.GetCurrentInfo();
         try {
           buffer.WriteTo(client_socket);
