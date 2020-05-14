@@ -18,6 +18,7 @@ void ClientAgent::InitGame(const std::string &host, const size_t tcp_port,
   sf::Image image;
 
   unsigned player_id = tcp_socket_agent_.Initialize(host, tcp_port, image);
+  map_.SetMapSize(image.getSize());
   udp_socket_agent_.Initialize(host, udp_port, player_id);
 
   graphic_agent_.Initialize(std::move(image), player_id);

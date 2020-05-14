@@ -7,7 +7,6 @@
 
 #include <cstdlib>
 
-
 namespace TCPSocketHelper {
 
 class InetAtonException : public std::exception {
@@ -25,11 +24,15 @@ void MakeNonblock(int socket_fd);
 bool WouldBlock();
 
 struct ConstBuffer {
- public:
+public:
   ConstBuffer() = delete;
   ConstBuffer(char *ptr, size_t size);
 
+  ConstBuffer &operator=(ConstBuffer &) = delete;
+
   char *GetBuffer();
+
+  char* GetEnd();
 
   size_t GetSize();
 
@@ -39,11 +42,11 @@ struct ConstBuffer {
 
   ~ConstBuffer();
 
- private:
+private:
   char *buffer_ = nullptr;
   size_t size_ = 0;
 };
 
-};
+}; // namespace TCPSocketHelper
 
-#endif //GAME_SRC_TCPSOCKETHELPER_H_
+#endif // GAME_SRC_TCPSOCKETHELPER_H_

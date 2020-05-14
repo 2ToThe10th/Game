@@ -2,20 +2,21 @@
 // Created by 2ToThe10th on 03.04.2020.
 //
 
-#include <unistd.h>
-#include <system_error>
+#include <cstring>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <system_error>
+#include <unistd.h>
 
 #include "TCPSocketHelper.h"
-
 
 namespace TCPSocketHelper {
 
 void WriteAll(int socket_fd, const char *buffer, size_t buffer_size) {
   size_t already_written = 0;
   while (buffer_size > 0) {
-    int was_written = send(socket_fd, buffer + already_written, buffer_size, MSG_NOSIGNAL);
+    int was_written =
+        send(socket_fd, buffer + already_written, buffer_size, MSG_NOSIGNAL);
     if (was_written < 0) {
       throw std::system_error(errno, std::generic_category());
     }
@@ -47,25 +48,19 @@ void MakeNonblock(int socket_fd) {
   }
 }
 
-bool WouldBlock() {
-  return errno == EWOULDBLOCK || errno == EAGAIN;
-}
+bool WouldBlock() { return errno == EWOULDBLOCK || errno == EAGAIN; }
 
-ConstBuffer::ConstBuffer(char *ptr, size_t size) : buffer_(ptr), size_(size) {
+ConstBuffer::ConstBuffer(char *ptr, size_t size) : buffer_(ptr), size_(size) {}
 
-}
+char *ConstBuffer::GetBuffer() { return buffer_; }
 
-char *ConstBuffer::GetBuffer() {
-  return buffer_;
-}
+size_t ConstBuffer::GetSize() { return size_; }
 
-size_t ConstBuffer::GetSize() {
-  return size_;
-}
-
-void ConstBuffer::WriteTo(int socket_fd) const { //TODO: Send by one package
-  WriteAll(socket_fd, reinterpret_cast<const char *>(&size_), sizeof(size_));
-  WriteAll(socket_fd, buffer_, size_);
+void ConstBuffer::WriteTo(int socket_fd) const {
+  char to_send[sizeof(size_) + size_];
+  memcpy(to_send, &size_, sizeof(size_));
+  memcpy(to_send + sizeof(size_), buffer_, size_);
+  WriteAll(socket_fd, to_send, sizeof(size_) + size_);
 }
 
 ConstBuffer ConstBuffer::ReadFrom(int socket_fd) {
@@ -85,5 +80,6 @@ ConstBuffer::~ConstBuffer() {
     delete[] buffer_;
   }
 }
+char *ConstBuffer::GetEnd() { return buffer_ + size_; }
 
-}
+} // namespace TCPSocketHelper
