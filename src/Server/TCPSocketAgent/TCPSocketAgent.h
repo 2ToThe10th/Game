@@ -7,22 +7,31 @@
 
 #include <thread>
 
-#include "../ServerAgent/ServerMap.h"
 #include "../../Duration.h"
 #include "../../EpollOneReturn.h"
-
+#include "../ServerAgent/ServerMap.h"
 
 namespace Server::TCPSocketAgent {
 
 class TCPSocketAgent {
- public:
+public:
   explicit TCPSocketAgent(ServerMap &main_map);
 
   void Initialize(size_t port);
 
   void Close();
 
- private:
+private:
+  void AcceptLoop();
+  void SendImage(int socket);
+  void SetAndSendPlayerId(int client_socket);
+
+  void CheckHashAndWriteLoop();
+
+  static std::vector<uint64_t>
+  HashVectorFromBuffer(TCPSocketHelper::ConstBuffer &buffer);
+
+private:
   Server::ServerMap &main_map_;
   std::thread tcp_accept_thread_;
   std::thread tcp_write_thread_;
@@ -32,15 +41,8 @@ class TCPSocketAgent {
 
   static constexpr size_t kEpollTimeoutMillisecond = 1000;
   static constexpr Time::Duration kWriteAllPeriod = Time::Duration(1000);
-
- private:
-  void AcceptLoop();
-  void SendImage(int socket);
-  void SetAndSendPlayerId(int client_socket);
-
-  void CheckHashAndWriteLoop();
 };
 
-}
+} // namespace Server::TCPSocketAgent
 
-#endif //GAME_SRC_SERVER_TCPSOCKETAGENT_TCPSOCKETAGENT_H_
+#endif // GAME_SRC_SERVER_TCPSOCKETAGENT_TCPSOCKETAGENT_H_

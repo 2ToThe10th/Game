@@ -2,20 +2,17 @@
 // Created by 2ToThe10th on 03.04.2020.
 //
 
-#include <sys/socket.h>
-#include <iostream>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include "TCPSocketAgent.h"
 #include "../../EpollOneReturn.h"
-
+#include <arpa/inet.h>
+#include <iostream>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 namespace Server::TCPSocketAgent {
 
-TCPSocketAgent::TCPSocketAgent(ServerMap &main_map) : main_map_(main_map) {
-
-}
+TCPSocketAgent::TCPSocketAgent(ServerMap &main_map) : main_map_(main_map) {}
 
 void TCPSocketAgent::Initialize(size_t port) {
 
@@ -24,13 +21,16 @@ void TCPSocketAgent::Initialize(size_t port) {
     throw std::system_error(errno, std::generic_category());
   }
 
-  struct sockaddr_in addr = {.sin_family = AF_INET, .sin_port = htons(port),};
+  struct sockaddr_in addr = {
+      .sin_family = AF_INET,
+      .sin_port = htons(port),
+  };
 
   if (inet_aton("0.0.0.0", &addr.sin_addr) != 1) {
     throw TCPSocketHelper::InetAtonException();
   }
 
-  if (bind(accept_socket_, (struct sockaddr *) &addr, sizeof(addr)) != 0) {
+  if (bind(accept_socket_, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
     throw std::system_error(errno, std::generic_category());
   }
 
@@ -38,13 +38,9 @@ void TCPSocketAgent::Initialize(size_t port) {
     throw std::system_error(errno, std::generic_category());
   }
 
-  tcp_accept_thread_ = std::thread([this] {
-    this->AcceptLoop();
-  });
+  tcp_accept_thread_ = std::thread([this] { this->AcceptLoop(); });
 
-  tcp_write_thread_ = std::thread([this] {
-    this->CheckHashAndWriteLoop();
-  });
+  tcp_write_thread_ = std::thread([this] { this->CheckHashAndWriteLoop(); });
 }
 
 void TCPSocketAgent::AcceptLoop() {
@@ -70,7 +66,6 @@ void TCPSocketAgent::AcceptLoop() {
 
       SendImage(client_socket);
       SetAndSendPlayerId(client_socket);
-
     }
   }
 }
@@ -78,18 +73,21 @@ void TCPSocketAgent::AcceptLoop() {
 void TCPSocketAgent::SendImage(int socket) {
   unsigned height = main_map_.GetImage().getSize().y;
   unsigned width = main_map_.GetImage().getSize().x;
-  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&height), sizeof(height));
-  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *> (&width), sizeof(width));
-  TCPSocketHelper::WriteAll(socket,
-                            reinterpret_cast<const char *> (main_map_.GetImage().getPixelsPtr()),
-                            4 * height * width);
+  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *>(&height),
+                            sizeof(height));
+  TCPSocketHelper::WriteAll(socket, reinterpret_cast<const char *>(&width),
+                            sizeof(width));
+  TCPSocketHelper::WriteAll(
+      socket,
+      reinterpret_cast<const char *>(main_map_.GetImage().getPixelsPtr()),
+      4 * height * width);
 }
 
 void TCPSocketAgent::SetAndSendPlayerId(int client_socket) {
   unsigned client_id = main_map_.AddPlayer();
 
   TCPSocketHelper::WriteAll(client_socket,
-                            reinterpret_cast<const char *> (&client_id),
+                            reinterpret_cast<const char *>(&client_id),
                             sizeof(client_id));
 
   client_epoll_.Add(client_socket);
@@ -106,33 +104,46 @@ void TCPSocketAgent::Close() {
   close(accept_socket_);
 }
 
+std::vector<uint64_t>
+TCPSocketAgent::HashVectorFromBuffer(TCPSocketHelper::ConstBuffer &buffer) {
+  std::vector<uint64_t> client_hash_vector;
+  unsigned cur_position_in_client_hash = 0;
+  while (cur_position_in_client_hash <= buffer.GetSize() - sizeof(uint64_t)) {
+    uint64_t hash;
+    memcpy(&hash, buffer.GetBuffer() + cur_position_in_client_hash,
+           sizeof(hash));
+    client_hash_vector.emplace_back(hash);
+    cur_position_in_client_hash += sizeof(uint64_t);
+  }
+  return std::move(client_hash_vector);
+}
+
 void TCPSocketAgent::CheckHashAndWriteLoop() {
 
   while (is_work_) {
     int client_socket;
     if (client_epoll_.WaitWithFd(kEpollTimeoutMillisecond, client_socket)) {
-      uint64_t client_hash;
       try {
-        TCPSocketHelper::ReadAll(client_socket,
-                                 reinterpret_cast<char *>(&client_hash),
-                                 sizeof(client_hash));
-      } catch (std::system_error &system_error) {
-        close(client_socket);
-      }
-      auto current_hash = main_map_.GetHash();
-//      std::cout << "[CheckHashAndWriteLoop] Get hash: " << client_hash << "   Current hash: "
-//                << current_hash << std::endl;
-      if (client_hash != current_hash) {
-//        std::cout << "Send current situation" << std::endl;
-        auto buffer = main_map_.GetCurrentInfo();
-        try {
-          buffer.WriteTo(client_socket);
-        } catch (std::system_error &system_error) {
-          close(client_socket);
+        auto client_hash =
+            TCPSocketHelper::ConstBuffer::ReadFrom(client_socket);
+        if (client_hash.GetBuffer() == nullptr) {
+          throw std::runtime_error("Player left game");
         }
+        auto current_hash = main_map_.GetHash();
+        uint64_t client_hash_of_all = *(uint64_t *)client_hash.GetBuffer();
+        if (client_hash.GetSize() / sizeof(uint64_t) != current_hash.size()) {
+          throw std::range_error("Client hash size != Current hash size");
+        }
+        if (client_hash_of_all != current_hash[0]) {
+          auto client_hash_vector = HashVectorFromBuffer(client_hash);
+          auto buffer = main_map_.GetDifference(client_hash_vector);
+          buffer.WriteTo(client_socket);
+        }
+      } catch (...) { // ignore
+        close(client_socket);
       }
     }
   }
 }
 
-}
+} // namespace Server::TCPSocketAgent

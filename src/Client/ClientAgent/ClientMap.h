@@ -22,6 +22,8 @@ class ClientMap {
  public:
   ClientMap() = default;
 
+  void SetMapSize(sf::Vector2u size);
+
   void UpdatePlayer(unsigned int player_id, char *buffer);
 
   void UpdateByConstBuffer(TCPSocketHelper::ConstBuffer &const_buffer);
@@ -29,18 +31,23 @@ class ClientMap {
   template<typename Map>
   bool Synchronize(Map &map);
 
-  uint64_t GetHash();
+  TCPSocketHelper::ConstBuffer GetHash();
 
   virtual ~ClientMap() = default;
+
+private:
+  void DeletePlayer(unsigned int player_id);
+  void AddPlayerIfNotExist(unsigned player_id);
+  void DeletePlayerIfExist(unsigned player_id);
+  unsigned int UpdateExistPlayers(TCPSocketHelper::ConstBuffer &const_buffer);
 
  private:
   std::vector<std::unique_ptr<Player>> players_;
   std::mutex mutex_;
   size_t number_of_changes_ = 0;
+  unsigned map_x_size_ = 0;
+  unsigned map_y_size_ = 0;
 
- private:
-  void DeletePlayersFromTo(unsigned int from, unsigned int to);
-  void DeleteOnePlayer(unsigned int player_id);
 };
 
 template<typename Map>
@@ -53,9 +60,7 @@ bool ClientMap::Synchronize(Map &map) {
 
   map.PlayerVector().resize(players_.size());
 
-//  std::cout << "[Synchronize] " << players_.size() << std::endl;
   for (int index = 0; index < players_.size(); ++index) {
-//    std::cout << "[Synchronize] " << index << " " << (map.PlayerVector()[index] == nullptr) << std::endl;
     if (players_[index] == nullptr) {
       if (map.PlayerVector()[index] != nullptr) {
         map.PlayerVector()[index] = nullptr;

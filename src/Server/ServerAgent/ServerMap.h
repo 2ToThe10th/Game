@@ -13,14 +13,13 @@
 
 #include "../../Player.h"
 #include "../../TCPSocketHelper.h"
-#include "UDPToPhysicsQueue.h"
 #include "PhysicsToMapQueue.h"
-
+#include "UDPToPhysicsQueue.h"
 
 namespace Server {
 
 class ServerMap {
- public:
+public:
   ServerMap() = default;
 
   void LoadImageFromFile(const std::string &image_file);
@@ -31,7 +30,7 @@ class ServerMap {
 
   void DeletePlayer(unsigned int player_id, bool is_already_lock);
 
-  TCPSocketHelper::ConstBuffer GetCurrentInfo();
+  TCPSocketHelper::ConstBuffer GetDifference(std::vector<uint64_t> &client_hash);
 
   [[nodiscard]] Location GetPlayerLocation(unsigned player_id);
 
@@ -43,24 +42,27 @@ class ServerMap {
 
   bool WasSynchronized();
 
-  uint64_t GetHash();
+  std::vector<uint64_t> GetHash();
 
- private:
-  void HandleDeletedPlayer(unsigned player_id, char* current_position_in_buffer);
+private:
+  void HandleDeletedPlayer(unsigned player_id,
+                           char *current_position_in_buffer);
 
- public:
+  TCPSocketHelper::ConstBuffer GetExistPlayer();
+  std::vector<uint64_t> GetHashWithoutMutex();
+
+public:
   UDPToPhysicsQueue udp_to_physics_queue_;
   PhysicsToMapQueue physics_to_map_queue_;
 
- private:
+private:
   std::vector<std::unique_ptr<Player>> players_;
   std::shared_mutex mutex_players_;
   sf::Image background_;
   bool was_synchronized_ = false;
   unsigned number_of_players_ = 0;
-
 };
 
-}  // namespace Server
+} // namespace Server
 
-#endif  // GAME_SRC_MAP_H_
+#endif // GAME_SRC_MAP_H_

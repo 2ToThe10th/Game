@@ -40,7 +40,6 @@ void UDPSocketAgent::Initialize(const std::string &host, const size_t port, unsi
 
 void UDPSocketAgent::WriteToServer(const std::string &message) {
   size_t real_size = message.size() + sizeof(player_id_);
-//  std::cout << "[Real size]" << real_size << std::endl;
   char real_message[real_size];
   memcpy(real_message, &player_id_, sizeof(player_id_));
   memcpy(real_message + sizeof(player_id_), message.c_str(), message.size());

@@ -21,6 +21,8 @@ class GraphicAgent {
 
   void Initialize(sf::Image &&image, unsigned my_player_id);
 
+  void Resized();
+
   void Draw();
 
  private:
@@ -30,6 +32,8 @@ class GraphicAgent {
 
   void UpdateScale();
   void UpdateStartWindowLocation();
+
+  bool WasResized();
 
   unsigned GetXLeftToDraw();
   unsigned GetYLeftToDraw();
@@ -45,6 +49,7 @@ class GraphicAgent {
   sf::Vector2u start_window_size_;
   float scale_x_ = 1;
   float scale_y_ = 1;
+  bool was_resized_ = false;
   unsigned my_player_id_;
   Location start_window_location_;
   GraphicMap graphic_map_;
